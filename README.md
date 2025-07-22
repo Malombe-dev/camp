@@ -1,6 +1,6 @@
 
 
-# 🇰🇪 2027 Presidential Campaign Website - MERN Stack
+# 🇰🇪 Campaign Website - MERN Stack
 
 **"Reset. Restore. Rebuild."** - A comprehensive web platform for the 2027 Presidential Campaign in Kenya.
 
