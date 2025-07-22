@@ -1,70 +1,310 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+# 🇰🇪 2027 Presidential Campaign Website - MERN Stack
 
-In the project directory, you can run:
+**"Reset. Restore. Rebuild."** - A comprehensive web platform for the 2027 Presidential Campaign in Kenya.
 
-### `npm start`
+## 🌍 Technology Stack
+- **MongoDB** - Database for volunteers, press releases, updates, media
+- **Express.js** - Backend API server
+- **React.js** - Frontend user interface
+- **Node.js** - Runtime environment
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 📁 Complete Project Structure
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```
+2027-campaign/
+│
+├── client/                          # React Frontend
+│   ├── public/
+│   │   ├── index.html
+│   │   ├── favicon.ico
+│   │   ├── manifest.json
+│   │   └── images/
+│   │       ├── logo.png
+│   │       ├── hero-bg.jpg
+│   │       └── campaign-photos/
+│   │
+│   └── src/
+│       ├── assets/                  # Static assets
+│       │   ├── images/
+│       │   ├── videos/
+│       │   └── documents/
+│       │
+│       ├── components/              # Reusable components
+│       │   ├── common/
+│       │   │   ├── Navbar.jsx
+│       │   │   ├── Footer.jsx
+│       │   │   ├── Loader.jsx
+│       │   │   ├── Modal.jsx
+│       │   │   └── SEO.jsx
+│       │   │
+│       │   ├── cards/
+│       │   │   ├── PressCard.jsx
+│       │   │   ├── MomentCard.jsx
+│       │   │   ├── TestimonialCard.jsx
+│       │   │   └── EventCard.jsx
+│       │   │
+│       │   ├── forms/
+│       │   │   ├── VolunteerForm.jsx
+│       │   │   ├── ContactForm.jsx
+│       │   │   └── NewsletterSignup.jsx
+│       │   │
+│       │   └── media/
+│       │       ├── YouTubeEmbed.jsx
+│       │       ├── ImageGallery.jsx
+│       │       └── VideoPlayer.jsx
+│       │
+│       ├── pages/                   # Main pages
+│       │   ├── Home.jsx
+│       │   ├── About.jsx
+│       │   ├── Press.jsx
+│       │   ├── Moments.jsx
+│       │   ├── Join.jsx
+│       │   ├── Donate.jsx
+│       │   ├── Contact.jsx
+│       │   ├── Events.jsx
+│       │   ├── Policies.jsx
+│       │   └── NotFound.jsx
+│       │
+│       ├── services/                # API calls
+│       │   ├── api.js
+│       │   ├── volunteerService.js
+│       │   ├── pressService.js
+│       │   ├── mediaService.js
+│       │   └── contactService.js
+│       │
+│       ├── utils/                   # Helper functions
+│       │   ├── formatters.js
+│       │   ├── validators.js
+│       │   ├── constants.js
+│       │   └── locationData.js
+│       │
+│       ├── hooks/                   # Custom React hooks
+│       │   ├── useApi.js
+│       │   ├── useForm.js
+│       │   └── useLocation.js
+│       │
+│       ├── context/                 # React Context
+│       │   ├── AppContext.jsx
+│       │   └── LocationContext.jsx
+│       │
+│       ├── styles/                  # CSS/SCSS files
+│       │   ├── globals.css
+│       │   ├── components.css
+│       │   └── variables.css
+│       │
+│       ├── App.jsx
+│       ├── main.jsx
+│       └── index.css
+│
+├── server/                          # Node.js + Express Backend
+│   ├── config/
+│   │   ├── database.js              # MongoDB connection
+│   │   ├── cors.js                  # CORS configuration
+│   │   └── cloudinary.js            # Image upload config
+│   │
+│   ├── controllers/
+│   │   ├── volunteerController.js
+│   │   ├── pressController.js
+│   │   ├── mediaController.js
+│   │   ├── contactController.js
+│   │   └── eventController.js
+│   │
+│   ├── models/
+│   │   ├── Volunteer.js
+│   │   ├── Press.js
+│   │   ├── Media.js
+│   │   ├── Contact.js
+│   │   ├── Event.js
+│   │   └── Newsletter.js
+│   │
+│   ├── routes/
+│   │   ├── volunteers.js
+│   │   ├── press.js
+│   │   ├── media.js
+│   │   ├── contact.js
+│   │   └── events.js
+│   │
+│   ├── middleware/
+│   │   ├── errorHandler.js
+│   │   ├── validation.js
+│   │   ├── rateLimiter.js
+│   │   └── auth.js
+│   │
+│   ├── utils/
+│   │   ├── emailService.js
+│   │   ├── fileUpload.js
+│   │   └── helpers.js
+│   │
+│   └── server.js                    # Main server file
+│
+├── admin/                           # Admin Panel (Optional)
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   └── services/
+│   └── package.json
+│
+├── .env                             # Environment variables
+├── .env.example                     # Environment template
+├── .gitignore
+├── package.json                     # Root package.json with scripts
+├── README.md
+└── LICENSE
 
-### `npm test`
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🚀 Key Features Implementation
 
-### `npm run build`
+### Frontend Pages Structure
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+#### 1. **Home.jsx** - Landing Page
+- Hero section with "Reset. Restore. Rebuild." slogan
+- Latest campaign videos and speeches
+- Key policy highlights
+- Call-to-action buttons (Join, Donate)
+- Latest news ticker
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+#### 2. **About.jsx** - Candidate Profile
+- David Maraga biography
+- Professional background and achievements
+- Vision and mission statements
+- Testimonials and endorsements
+- Interactive timeline
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+#### 3. **Press.jsx** - Media Center
+- Latest official statements
+- Press releases with date/category filters
+- Downloadable documents
+- Media contacts
+- Search functionality
 
-### `npm run eject`
+#### 4. **Moments.jsx** - Campaign Gallery
+- Kenya Ideas Festival photos
+- Campaign event galleries
+- Video highlights
+- Social media integration
+- Interactive photo viewer
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+#### 5. **Join.jsx** - Volunteer Registration
+- Dynamic county → constituency → ward selectors
+- Skills and availability forms
+- Volunteer opportunities listing
+- Integration with location services
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+#### 6. **Contact.jsx** - Get in Touch
+- Campaign headquarters information
+- Regional offices
+- Contact forms
+- Interactive map
+- Social media links
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Backend API Structure
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+#### Models (Mongoose Schemas)
+- **Volunteer**: Personal info, location, skills, availability
+- **Press**: Title, content, category, date, attachments
+- **Media**: Photos, videos, captions, events
+- **Contact**: Inquiries, feedback, support requests
+- **Event**: Campaign events, locations, dates
 
-## Learn More
+#### API Endpoints
+```
+GET  /api/volunteers      - Get volunteer statistics
+POST /api/volunteers      - Register new volunteer
+GET  /api/press          - Get press releases
+POST /api/press          - Create press release (admin)
+GET  /api/media          - Get media gallery
+POST /api/media          - Upload media (admin)
+GET  /api/locations      - Get Kenya location data
+POST /api/contact        - Submit contact form
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🛠️ Setup Instructions
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### 1. Initialize Project
+```bash
+mkdir 2027-campaign
+cd 2027-campaign
+npm init -y
+```
 
-### Code Splitting
+### 2. Frontend Setup (React + Vite)
+```bash
+cd client
+npm create vite@latest . -- --template react
+npm install axios react-router-dom
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 3. Backend Setup (Node.js + Express)
+```bash
+cd server
+npm init -y
+npm install express mongoose cors dotenv bcryptjs jsonwebtoken
+npm install -D nodemon
+```
 
-### Analyzing the Bundle Size
+### 4. Environment Variables (.env)
+```env
+# Database
+MONGODB_URI=mongodb://localhost:27017/campaign2027
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+# Server
+PORT=5000
+NODE_ENV=development
 
-### Making a Progressive Web App
+# JWT
+JWT_SECRET=your_jwt_secret_here
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+# Email Service
+EMAIL_SERVICE_API_KEY=your_email_key
+EMAIL_FROM=info@campaign2027.ke
 
-### Advanced Configuration
+# Cloudinary (for image uploads)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 📱 Responsive Design Features
 
-### Deployment
+### Mobile-First Components
+- Responsive navigation with hamburger menu
+- Touch-friendly volunteer forms
+- Optimized image galleries for mobile
+- Progressive Web App (PWA) capabilities
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Kenya-Specific Features
+- County/Constituency/Ward location selectors
+- Swahili/English language toggle
+- Kenya timezone handling
+- Local phone number validation
+- M-Pesa integration placeholder
 
-### `npm run build` fails to minify
+## 🔒 Security Considerations
+- Input validation and sanitization
+- Rate limiting on API endpoints
+- CORS configuration
+- Environment variable protection
+- Data encryption for sensitive information
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 📊 Analytics Integration
+- Google Analytics setup
+- Campaign engagement tracking
+- Volunteer registration metrics
+- Geographic distribution analysis
+
+## 🚀 Deployment Options
+- **Frontend**: Vercel, Netlify, or AWS S3
+- **Backend**: Heroku, Railway, or AWS EC2
+- **Database**: MongoDB Atlas
+- **CDN**: Cloudinary for media assets
+
+## 📧 Email Integration
+- Welcome emails for new volunteers
+- Press release notifications
+- Event reminders
+- Newsletter subscriptions
+
+This structure provides a solid foundation for building a comprehensive presidential campaign website that can handle volunteer management, media distribution, and public engagement effectively.
