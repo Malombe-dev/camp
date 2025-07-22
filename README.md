@@ -2,7 +2,7 @@
 
 # 🇰🇪 Campaign Website - MERN Stack
 
-**"Reset. Restore. Rebuild."** - A comprehensive web platform for the 2027 Presidential Campaign in Kenya.
+**"Reset. Restore. Rebuild."** - A comprehensive web platform for the Campaign in Kenya.
 
 ## 🌍 Technology Stack
 - **MongoDB** - Database for volunteers, press releases, updates, media
@@ -13,7 +13,7 @@
 ## 📁 Complete Project Structure
 
 ```
-2027-campaign/
+campaign/
 │
 ├── client/                          # React Frontend
 │   ├── public/
@@ -167,7 +167,7 @@
 - Latest news ticker
 
 #### 2. **About.jsx** - Candidate Profile
-- David Maraga biography
+- biography
 - Professional background and achievements
 - Vision and mission statements
 - Testimonials and endorsements
@@ -225,8 +225,8 @@ POST /api/contact        - Submit contact form
 
 ### 1. Initialize Project
 ```bash
-mkdir 2027-campaign
-cd 2027-campaign
+mkdir campaign
+cd campaign
 npm init -y
 ```
 
