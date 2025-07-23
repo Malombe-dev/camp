@@ -24,9 +24,21 @@ const Donate = () => {
   // --- fetch recent supporters on mount ---
   useEffect(() => {
     axios.get('/api/donations/recent')
-      .then(res => setRecentSupporters(res.data))
-      .catch(() => setRecentSupporters([]));
+      .then(res => {
+        const data = res.data;
+        if (Array.isArray(data)) {
+          setRecentSupporters(data);
+        } else {
+          console.warn("Expected array but got:", data);
+          setRecentSupporters([]); // fallback to empty
+        }
+      })
+      .catch(err => {
+        console.error("❌ Failed to fetch recent supporters:", err.message);
+        setRecentSupporters([]); // safe fallback
+      });
   }, []);
+  
 
   // --- predefined amounts & impact messages ---
   const predefinedAmounts = [500, 1000, 2500, 5000, 10000, 25000];
