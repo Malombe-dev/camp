@@ -12,6 +12,8 @@ const Navbar = () => {
     { id: '/moments', label: 'Moments', icon: '📸' },
     { id: '/join', label: 'Join Us', icon: '🤝' },
     { id: '/contact', label: 'Contact', icon: '📞' },
+    { id: '/donate', label: 'Donate', icon: '💝' },
+
   ];
 
   return (

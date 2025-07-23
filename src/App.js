@@ -8,6 +8,7 @@ import Press from './pages/PressPage';
 import Moments from './pages/Moments';
 import Join from './pages/Join';
 import ContactForm from './components/forms/ContactForm';
+import Donate from './pages/Donate';
 
 // import NotFound from './pages/NotFound';
 
@@ -23,6 +24,7 @@ function App() {
           <Route path="/moments" element={<Moments />} />
           <Route path="/join" element={<Join />} />
           <Route path="/contact" element={<ContactForm />} />
+          <Route path="/donate" element={<Donate />} />
           {/* <Route path="*" element={<NotFound />} />  */}
         </Routes>
       </main>

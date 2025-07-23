@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CreditCard, Smartphone, Building2, Users, Target, TrendingUp, Shield, CheckCircle } from 'lucide-react';
 import SEO from '../components/common/SEO';
+import axios from 'axios'; // or your own api helper
 
 const Donate = () => {
   const [selectedAmount, setSelectedAmount] = useState('');
@@ -17,8 +18,18 @@ const Donate = () => {
   const [paymentMethod, setPaymentMethod] = useState('mpesa');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const predefinedAmounts = [500, 1000, 2500, 5000, 10000, 25000];
+  // live recent supporters
+  const [recentSupporters, setRecentSupporters] = useState([]);
 
+  // --- fetch recent supporters on mount ---
+  useEffect(() => {
+    axios.get('/api/donations/recent')
+      .then(res => setRecentSupporters(res.data))
+      .catch(() => setRecentSupporters([]));
+  }, []);
+
+  // --- predefined amounts & impact messages ---
+  const predefinedAmounts = [500, 1000, 2500, 5000, 10000, 25000];
   const impactMessages = {
     500: "Feeds 5 volunteers for a day during campaign events",
     1000: "Covers transportation for rural outreach programs",
@@ -27,7 +38,6 @@ const Donate = () => {
     10000: "Supports voter education programs for 1 week",
     25000: "Funds campaign activities for an entire county"
   };
-
   const campaignStats = {
     raised: 15750000,
     goal: 50000000,
@@ -35,87 +45,77 @@ const Donate = () => {
     counties: 47
   };
 
+  // --- handlers ---
   const handleAmountSelect = (amount) => {
     setSelectedAmount(amount);
     setCustomAmount('');
   };
-
   const handleCustomAmountChange = (e) => {
     const value = e.target.value;
     setCustomAmount(value);
     setSelectedAmount('');
   };
-
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setDonorInfo(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    setDonorInfo(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
-
-    // Simulate payment processing
+    // … your existing submit logic …
     setTimeout(() => {
       setIsProcessing(false);
-      alert('Thank you for your donation! You will receive a confirmation shortly.');
+      alert('Thank you for your donation!');
     }, 2000);
   };
 
-  const finalAmount = selectedAmount || customAmount;
-  const progressPercentage = (campaignStats.raised / campaignStats.goal) * 100;
+  const finalAmount = selectedAmount || customAmount || 0;
+  const progressPercentage = Math.min((campaignStats.raised / campaignStats.goal) * 100, 100);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <SEO 
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50">
+      <SEO
         title="Donate - Support the Reset Movement | Campaign 2027"
-        description="Join thousands of Kenyans supporting real change. Your contribution helps build a better Kenya through transparent leadership and accountable governance."
-        keywords="donate, support campaign, Kenya election 2027, political donation, campaign funding"
+        description="Join thousands of Kenyans supporting real change. Your contribution helps build a better Kenya."
+        keywords="donate, Kenya election 2027, campaign funding"
       />
 
-      {/* Hero Section */}
-      <section className="bg-primary text-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Support the Reset Movement
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-              Join thousands of Kenyans investing in real change. Your contribution helps build a better Kenya through transparent leadership and accountable governance.
-            </p>
-            <div className="bg-white bg-opacity-20 rounded-lg p-6 max-w-2xl mx-auto">
-              <div className="text-3xl font-bold mb-2">
-                KSh {campaignStats.raised.toLocaleString()} raised
-              </div>
-              <div className="text-lg mb-4">
-                Goal: KSh {campaignStats.goal.toLocaleString()}
-              </div>
-              <div className="w-full bg-white bg-opacity-30 rounded-full h-3 mb-4">
-                <div 
-                  className="bg-white h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(progressPercentage, 100)}%` }}
-                ></div>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>{campaignStats.donors.toLocaleString()} donors</span>
-                <span>{campaignStats.counties} counties represented</span>
-              </div>
+      {/* Hero (no extra top space) */}
+      <section className="py-16 md:py-24 bg-gradient-to-r from-green-600 via-green-700 to-blue-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6">
+            Support the Reset Movement
+          </h1>
+          <p className="text-xl md:text-2xl max-w-3xl mx-auto mb-8">
+            Join thousands of Kenyans investing in real change.
+          </p>
+
+          <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 max-w-2xl mx-auto">
+            <div className="text-3xl font-bold mb-2">KSh {campaignStats.raised.toLocaleString()} raised</div>
+            <div className="text-lg mb-3">Goal: KSh {campaignStats.goal.toLocaleString()}</div>
+            <div className="w-full bg-white/30 rounded-full h-3 mb-3">
+              <div
+                className="bg-white h-3 rounded-full transition-all duration-500"
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>{campaignStats.donors.toLocaleString()} donors</span>
+              <span>{campaignStats.counties} counties represented</span>
             </div>
           </div>
         </div>
       </section>
 
+      {/* main content */}
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-2 gap-12">
-          {/* Donation Form */}
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          {/* donation form */}
+          <div className="bg-white rounded-xl shadow-xl p-8">
             <h2 className="text-2xl font-bold mb-6">Make Your Contribution</h2>
-            
+
             <form onSubmit={handleSubmit}>
-              {/* Amount Selection */}
+              {/* amount selection */}
               <div className="mb-6">
                 <label className="block text-sm font-semibold mb-3">Select Amount (KSh)</label>
                 <div className="grid grid-cols-3 gap-3 mb-4">
@@ -126,255 +126,139 @@ const Donate = () => {
                       onClick={() => handleAmountSelect(amount)}
                       className={`p-3 rounded-lg border-2 text-center font-semibold transition-all ${
                         selectedAmount === amount
-                          ? 'border-primary bg-primary text-white'
-                          : 'border-gray-300 hover:border-primary'
+                          ? 'border-green-600 bg-green-600 text-white'
+                          : 'border-gray-300 hover:border-green-500'
                       }`}
                     >
                       {amount.toLocaleString()}
                     </button>
                   ))}
                 </div>
-                
-                <div className="relative">
-                  <input
-                    type="number"
-                    placeholder="Enter custom amount"
-                    value={customAmount}
-                    onChange={handleCustomAmountChange}
-                    className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none"
-                    min="100"
-                  />
-                </div>
 
-                {finalAmount && impactMessages[finalAmount] && (
-                  <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="flex items-start">
-                      <Target className="text-green-600 mr-2 mt-0.5" size={16} />
-                      <p className="text-green-800 text-sm">
-                        <strong>Your Impact:</strong> {impactMessages[finalAmount]}
-                      </p>
-                    </div>
+                <input
+                  type="number"
+                  placeholder="Custom amount"
+                  value={customAmount}
+                  onChange={handleCustomAmountChange}
+                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
+                  min="100"
+                />
+                {finalAmount > 0 && impactMessages[finalAmount] && (
+                  <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+                    <Target className="inline w-4 h-4 mr-1" />
+                    <strong>Your Impact:</strong> {impactMessages[finalAmount]}
                   </div>
                 )}
               </div>
 
-              {/* Payment Method */}
+              {/* payment method */}
               <div className="mb-6">
                 <label className="block text-sm font-semibold mb-3">Payment Method</label>
                 <div className="grid grid-cols-3 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('mpesa')}
-                    className={`p-3 rounded-lg border-2 text-center transition-all ${
-                      paymentMethod === 'mpesa'
-                        ? 'border-primary bg-primary text-white'
-                        : 'border-gray-300 hover:border-primary'
-                    }`}
-                  >
-                    <Smartphone className="mx-auto mb-1" size={20} />
-                    <div className="text-sm font-semibold">M-Pesa</div>
-                  </button>
-                  
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('card')}
-                    className={`p-3 rounded-lg border-2 text-center transition-all ${
-                      paymentMethod === 'card'
-                        ? 'border-primary bg-primary text-white'
-                        : 'border-gray-300 hover:border-primary'
-                    }`}
-                  >
-                    <CreditCard className="mx-auto mb-1" size={20} />
-                    <div className="text-sm font-semibold">Card</div>
-                  </button>
-                  
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('bank')}
-                    className={`p-3 rounded-lg border-2 text-center transition-all ${
-                      paymentMethod === 'bank'
-                        ? 'border-primary bg-primary text-white'
-                        : 'border-gray-300 hover:border-primary'
-                    }`}
-                  >
-                    <Building2 className="mx-auto mb-1" size={20} />
-                    <div className="text-sm font-semibold">Bank</div>
-                  </button>
+                  {[
+                    { key: 'mpesa', icon: Smartphone, label: 'M-Pesa' },
+                    { key: 'card', icon: CreditCard, label: 'Card' },
+                    { key: 'bank', icon: Building2, label: 'Bank' }
+                  ].map(({ key, icon: Icon, label }) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setPaymentMethod(key)}
+                      className={`p-3 rounded-lg border-2 text-center transition-all ${
+                        paymentMethod === key
+                          ? 'border-green-600 bg-green-600 text-white'
+                          : 'border-gray-300 hover:border-green-500'
+                      }`}
+                    >
+                      <Icon className="mx-auto mb-1" size={20} />
+                      <div className="text-sm font-semibold">{label}</div>
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* Donor Information */}
+              {/* donor info */}
               <div className="mb-6">
                 <h3 className="text-lg font-semibold mb-4">Donor Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input
-                    type="text"
-                    name="fullName"
-                    placeholder="Full Name *"
-                    value={donorInfo.fullName}
-                    onChange={handleInputChange}
-                    className="p-3 border border-gray-300 rounded-lg focus:border-primary focus:outline-none"
-                    required
-                  />
-                  
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email Address *"
-                    value={donorInfo.email}
-                    onChange={handleInputChange}
-                    className="p-3 border border-gray-300 rounded-lg focus:border-primary focus:outline-none"
-                    required
-                  />
-                  
-                  <input
-                    type="tel"
-                    name="phone"
-                    placeholder="Phone Number *"
-                    value={donorInfo.phone}
-                    onChange={handleInputChange}
-                    className="p-3 border border-gray-300 rounded-lg focus:border-primary focus:outline-none"
-                    required
-                  />
-                  
-                  <select
-                    name="county"
-                    value={donorInfo.county}
-                    onChange={handleInputChange}
-                    className="p-3 border border-gray-300 rounded-lg focus:border-primary focus:outline-none"
-                    required
-                  >
+                  <input name="fullName" placeholder="Full Name *" value={donorInfo.fullName} onChange={handleInputChange} required />
+                  <input name="email" type="email" placeholder="Email *" value={donorInfo.email} onChange={handleInputChange} required />
+                  <input name="phone" type="tel" placeholder="Phone *" value={donorInfo.phone} onChange={handleInputChange} required />
+                  <select name="county" value={donorInfo.county} onChange={handleInputChange} required>
                     <option value="">Select County *</option>
                     <option value="nairobi">Nairobi</option>
                     <option value="mombasa">Mombasa</option>
                     <option value="kiambu">Kiambu</option>
                     <option value="nakuru">Nakuru</option>
-                    {/* Add more counties */}
+                    {/* …add all counties… */}
                   </select>
-                  
-                  <input
-                    type="text"
-                    name="occupation"
-                    placeholder="Occupation"
-                    value={donorInfo.occupation}
-                    onChange={handleInputChange}
-                    className="p-3 border border-gray-300 rounded-lg focus:border-primary focus:outline-none"
-                  />
-                  
-                  <input
-                    type="text"
-                    name="employer"
-                    placeholder="Employer"
-                    value={donorInfo.employer}
-                    onChange={handleInputChange}
-                    className="p-3 border border-gray-300 rounded-lg focus:border-primary focus:outline-none"
-                  />
+                  <input name="occupation" placeholder="Occupation" value={donorInfo.occupation} onChange={handleInputChange} />
+                  <input name="employer" placeholder="Employer" value={donorInfo.employer} onChange={handleInputChange} />
                 </div>
-                
-                <div className="mt-4">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      name="anonymous"
-                      checked={donorInfo.anonymous}
-                      onChange={handleInputChange}
-                      className="mr-2"
-                    />
-                    <span className="text-sm">Make this donation anonymous</span>
-                  </label>
-                </div>
+
+                <label className="flex items-center mt-4">
+                  <input type="checkbox" name="anonymous" checked={donorInfo.anonymous} onChange={handleInputChange} />
+                  <span className="ml-2 text-sm">Make donation anonymous</span>
+                </label>
               </div>
 
-              {/* Submit Button */}
+              {/* submit */}
               <button
                 type="submit"
                 disabled={!finalAmount || isProcessing}
-                className={`w-full py-4 rounded-lg font-bold text-lg transition-all ${
+                className={`w-full py-3 rounded-lg font-bold text-lg transition-all ${
                   finalAmount && !isProcessing
-                    ? 'bg-primary text-white hover:bg-primary-dark'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    ? 'bg-green-600 text-white hover:bg-green-700'
+                    : 'bg-gray-300 text-gray-500'
                 }`}
               >
-                {isProcessing ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Processing...
-                  </div>
-                ) : (
-                  `Donate KSh ${finalAmount ? parseInt(finalAmount).toLocaleString() : '0'}`
-                )}
+                {isProcessing ? 'Processing…' : `Donate KSh ${parseInt(finalAmount).toLocaleString()}`}
               </button>
             </form>
           </div>
 
-          {/* Campaign Impact & Info */}
+          {/* right column: impact + live supporters */}
           <div className="space-y-8">
-            {/* Why Donate */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h3 className="text-xl font-bold mb-4">Why Your Support Matters</h3>
-              <div className="space-y-4">
-                <div className="flex items-start">
-                  <Users className="text-primary mr-3 mt-1" size={20} />
-                  <div>
-                    <h4 className="font-semibold">Grassroots Campaign</h4>
-                    <p className="text-gray-600 text-sm">Powered by ordinary Kenyans who believe in change, not special interests.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <Shield className="text-primary mr-3 mt-1" size={20} />
-                  <div>
-                    <h4 className="font-semibold">Transparent Leadership</h4>
-                    <p className="text-gray-600 text-sm">Every shilling is accounted for and spent on programs that benefit all Kenyans.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <TrendingUp className="text-primary mr-3 mt-1" size={20} />
-                  <div>
-                    <h4 className="font-semibold">Real Impact</h4>
-                    <p className="text-gray-600 text-sm">Your contribution directly supports voter education and community outreach.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Donors */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h3 className="text-xl font-bold mb-4">Recent Supporters</h3>
-              <div className="space-y-3">
-                {[
-                  { name: "Sarah M.", location: "Nairobi", amount: 2500, time: "2 hours ago" },
-                  { name: "James K.", location: "Mombasa", amount: 1000, time: "5 hours ago" },
-                  { name: "Anonymous", location: "Kiambu", amount: 5000, time: "1 day ago" },
-                  { name: "Mary W.", location: "Nakuru", amount: 1500, time: "1 day ago" },
-                ].map((donor, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <div className="font-semibold">{donor.name}</div>
-                      <div className="text-sm text-gray-600">{donor.location}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-semibold text-primary">KSh {donor.amount.toLocaleString()}</div>
-                      <div className="text-sm text-gray-600">{donor.time}</div>
-                    </div>
+            {/* why donate */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-xl font-bold mb-4">Why Support Us</h3>
+              <div className="space-y-4 text-sm">
+                {[['Grassroots Campaign', Users], ['Transparent Leadership', Shield], ['Real Impact', TrendingUp]].map(([txt, Icon]) => (
+                  <div key={txt} className="flex items-start">
+                    <Icon className="text-green-600 mr-3 mt-0.5" size={20} />
+                    <div><div className="font-semibold">{txt}</div><p className="text-gray-600">Your contribution directly benefits Kenyans.</p></div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Security Notice */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <div className="flex items-start">
-                <CheckCircle className="text-blue-600 mr-3 mt-1" size={20} />
-                <div>
-                  <h4 className="font-semibold text-blue-800 mb-2">Secure & Compliant</h4>
-                  <p className="text-blue-700 text-sm">
-                    All donations are processed securely and comply with Kenya's campaign finance regulations. 
-                    You'll receive a receipt for your records and tax purposes.
-                  </p>
-                </div>
+            {/* live recent supporters */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-xl font-bold mb-4">Recent Supporters</h3>
+              <div className="space-y-3">
+                {recentSupporters.length === 0 ? (
+                  <p className="text-gray-500 text-sm">No donations yet.</p>
+                ) : (
+                  recentSupporters.map((d, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <div className="font-semibold">{d.anonymous ? 'Anonymous' : d.name}</div>
+                        <div className="text-xs text-gray-500">{d.county || 'Kenya'}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-green-600">KSh {Number(d.amount).toLocaleString()}</div>
+                        <div className="text-xs text-gray-500">{d.createdAt || 'now'}</div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
+            </div>
+
+            {/* security notice */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 text-sm text-blue-800">
+              <CheckCircle className="inline mr-2" size={20} />
+              All donations comply with Kenya's campaign finance laws. Receipts issued.
             </div>
           </div>
         </div>

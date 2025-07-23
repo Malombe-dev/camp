@@ -4,6 +4,8 @@ import { User, Mail, Phone, MapPin, Briefcase, Clock, Send, Check } from 'lucide
 import { locationData } from '../../utils/locationData';
 
 const VolunteerForm = ({ onSubmit }) => {
+ 
+
   const [formData, setFormData] = useState({
     personalInfo: {
       firstName: '',
@@ -107,18 +109,22 @@ const VolunteerForm = ({ onSubmit }) => {
 
   const handleArrayToggle = (path, value) => {
     setFormData(prev => {
-      const newData = { ...prev };
       const keys = path.split('.');
+      let newData = JSON.parse(JSON.stringify(prev)); // deep clone
       let current = newData;
+  
+      // Traverse to the parent of the target array
       for (let i = 0; i < keys.length - 1; i++) {
         current = current[keys[i]];
       }
-      const arr = current[keys[keys.length - 1]];
-      if (arr.includes(value)) {
-        current[keys[keys.length - 1]] = arr.filter(item => item !== value);
-      } else {
-        current[keys[keys.length - 1]] = [...arr, value];
-      }
+  
+      const lastKey = keys[keys.length - 1];
+      const arr = current[lastKey];
+  
+      current[lastKey] = arr.includes(value)
+        ? arr.filter(item => item !== value)
+        : [...arr, value];
+  
       return newData;
     });
   };
@@ -298,15 +304,15 @@ const VolunteerForm = ({ onSubmit }) => {
         </label>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           {skillCategories.map(skill => (
-            <label key={skill} className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={formData.skills.categories.includes(skill)}
-                onChange={() => handleArrayToggle('skills.categories', skill)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="text-sm">{skill}</span>
-            </label>
+            <label className="flex items-center space-x-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={formData.skills.categories.includes(skill)}
+              onChange={() => handleArrayToggle('skills.categories', skill)}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 pointer-events-none"
+            />
+            <span className="text-sm">{skill}</span>
+          </label>
           ))}
         </div>
         <input
