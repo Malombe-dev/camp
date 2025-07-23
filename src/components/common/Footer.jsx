@@ -70,7 +70,7 @@ const Footer = () => {
                 to="/about" 
                 className="block text-gray-300 hover:text-blue-400 transition-colors duration-200"
               >
-                About David Maraga
+                About Your Name
               </Link>
               <Link 
                 to="/policies" 
