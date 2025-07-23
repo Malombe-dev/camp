@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import Modal from '../components/common/Modal';
+import NewsletterSignup from '../components/forms/NewsletterSignup';
 
 const Home = () => {
+  const [isNewsletterOpen, setIsNewsletterOpen] = useState(false);
+
   return (
     <div className="bg-white">
       {/* Hero Section */}
@@ -29,9 +34,12 @@ const Home = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link to="/join">
             <button className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors duration-200 shadow-lg">
               🤝 Join Our Movement
             </button>
+          </Link>
+
             <button className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-black px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-200 shadow-lg">
               📖 Read Our Vision
             </button>
@@ -100,9 +108,11 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900">Latest Updates</h2>
+            <Link to={"/press"}>
             <button className="text-green-600 hover:text-green-700 font-semibold">
               View All Press Releases →
             </button>
+            </Link>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -174,9 +184,19 @@ const Home = () => {
             <button className="bg-white text-green-600 hover:bg-gray-100 px-8 py-4 rounded-lg text-lg font-semibold transition-colors duration-200">
               🗳️ Register to Vote
             </button>
-            <button className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-200">
-              📧 Stay Updated
-            </button>
+            <>
+              <button 
+                className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-200"
+                onClick={() => setIsNewsletterOpen(true)}
+              >
+                📧 Stay Updated
+              </button>
+
+              <Modal isOpen={isNewsletterOpen} onClose={() => setIsNewsletterOpen(false)}>
+                <NewsletterSignup />
+              </Modal>
+            </>
+
           </div>
         </div>
       </div>

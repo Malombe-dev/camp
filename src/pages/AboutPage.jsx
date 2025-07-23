@@ -59,11 +59,11 @@ const About = () => {
           <div className="text-center">
             <div className="mb-8">
               <div className="w-40 h-40 bg-white rounded-full mx-auto flex items-center justify-center shadow-2xl">
-                <span className="text-6xl">👤</span>
+                <span className="text-6xl"><img src="/images/m.jpg" alt="" className='w-40 h-40 bg-white rounded-full mx-auto flex items-center justify-center shadow-2xl"' /></span>
               </div>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-              David Maraga
+              Your Name
             </h1>
             <p className="text-xl md:text-2xl text-gray-200 mb-8 max-w-4xl mx-auto">
               Distinguished Jurist, Constitutional Scholar, and Visionary Leader
@@ -81,14 +81,14 @@ const About = () => {
           
           <div className="text-gray-600 leading-relaxed space-y-6">
             <p className="text-xl">
-              The Honorable David Maraga has dedicated his life to the service of justice, 
+              The Honorable your name has dedicated his life to the service of justice, 
               constitutional law, and the betterment of Kenya. With over four decades of 
               distinguished service in the legal profession, he brings unparalleled experience 
               and unwavering integrity to the highest office in the land.
             </p>
             
             <p>
-              Born and raised in Kenya, Justice Maraga's journey began with a deep commitment 
+              Born and raised in Kenya, Justice name's journey began with a deep commitment 
               to education and justice. He obtained his Bachelor of Laws degree with distinction 
               and was admitted to the bar in 1975. His legal career has been marked by landmark 
               cases that have shaped Kenya's constitutional landscape and strengthened democratic institutions.
@@ -102,7 +102,7 @@ const About = () => {
             </p>
             
             <p>
-              Now, Justice Maraga brings his wealth of experience, proven leadership, and vision 
+              Now, Justice name brings his wealth of experience, proven leadership, and vision 
               for a transformed Kenya to serve as the next President of the Republic, committed to 
               resetting, restoring, and rebuilding our great nation.
             </p>
@@ -175,7 +175,7 @@ const About = () => {
               to thrive, where corruption is a relic of the past, and where our diversity becomes 
               our greatest strength. Together, we will build a nation that works for all."
             </blockquote>
-            <cite className="text-gray-200 font-semibold">- David Maraga</cite>
+            <cite className="text-gray-200 font-semibold">- your name</cite>
           </div>
         </div>
       </div>
