@@ -3,7 +3,9 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://server-mern-zc6l.onrender.com/api';
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://server-mern-zc6l.onrender.com/api';
+
 
 
 
@@ -23,7 +25,7 @@ export default function Login() {
   setError(null);
 
   try {
-    const res = await fetch(`${API_BASE}/auth/login`, {
+    const res = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
