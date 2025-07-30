@@ -7,7 +7,7 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://server-mern-
 // Create axios instance
 export const apiRequest = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 100000,
   headers: {
     'Content-Type': 'application/json',
   },
