@@ -12,7 +12,8 @@ const Press = () => {
   const authHeader = { Authorization: token ? `Bearer ${token}` : '' };
 
   // API base URL - adjust this to match your backend
-  const API_BASE = 'http://localhost:5000/api'; // Changed to 5000 as that's typically where backend runs
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://server-mern-zc6l.onrender.com';
+
 
   const categories = [
     { id: 'all', label: 'All Releases', count: 0 },
@@ -28,7 +29,7 @@ const Press = () => {
       const token = localStorage.getItem('token');
       const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
   
-      const response = await fetch(`${API_BASE}/press`, { headers: authHeader });
+      const response = await fetch(`${API_BASE}/api/press`, { headers: authHeader });
   
       if (response.status === 401 || response.status === 403) {
         // Not authenticated → kick to login and remember where to come back
@@ -65,10 +66,10 @@ const Press = () => {
   const fetchPressByType = async (type) => {
     try {
       setLoading(true);
-      console.log('Fetching by type:', `${API_BASE}/press/type/${type}`);
+      console.log('Fetching by type:', `${API_BASE}/api/press/type/${type}`);
       
       
-      const response = await fetch(`${API_BASE}/press/type/${type}`, { headers: authHeader });
+      const response = await fetch(`${API_BASE}/api/press/type/${type}`, { headers: authHeader });
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -102,9 +103,9 @@ const Press = () => {
   const searchPressReleases = async (query) => {
     try {
       setLoading(true);
-      console.log('Searching:', `${API_BASE}/press/search?q=${encodeURIComponent(query)}`);
+      console.log('Searching:', `${API_BASE}/api/press/search?q=${encodeURIComponent(query)}`);
       
-      const response = await fetch(`${API_BASE}/press/search?q=${encodeURIComponent(query)}`, { headers: authHeader });
+      const response = await fetch(`${API_BASE}/api/press/search?q=${encodeURIComponent(query)}`, { headers: authHeader });
       
       if (!response.ok) {
         const errorText = await response.text();
