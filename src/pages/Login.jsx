@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://server-mern-zc6l.onrender.com/api';
+
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
