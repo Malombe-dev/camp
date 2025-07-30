@@ -1,78 +1,189 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Press = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [pressReleases, setPressReleases] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [stats, setStats] = useState({});
+  // inside Press.jsx, just under your other state
+  const token = localStorage.getItem('token');
+  const authHeader = { Authorization: token ? `Bearer ${token}` : '' };
+
+  // API base URL - adjust this to match your backend
+  const API_BASE = 'http://localhost:5000/api'; // Changed to 5000 as that's typically where backend runs
 
   const categories = [
-    { id: 'all', label: 'All Releases', count: 12 },
-    { id: 'announcement', label: 'Announcements', count: 4 },
-    { id: 'statement', label: 'Statements', count: 5 },
-    { id: 'speech', label: 'Speeches', count: 3 }
+    { id: 'all', label: 'All Releases', count: 0 },
+    { id: 'PRESS RELEASE', label: 'Press Releases', count: 0 },
+    { id: 'VIDEO', label: 'Videos', count: 0 },
+    { id: 'ANNOUNCEMENT', label: 'Announcements', count: 0 }
   ];
 
-  const pressReleases = [
-    {
-      id: 1,
-      title: "Campaign Launch: A New Dawn for Kenya",
-      category: 'announcement',
-      date: '2025-07-20',
-      excerpt: "Today marks the beginning of a transformative journey for our beloved Kenya. With the launch of our presidential campaign, we commit to resetting failed systems, restoring public trust, and rebuilding our nation stronger than ever before.",
-      readTime: '5 min read',
-      featured: true
-    },
-    {
-      id: 2,
-      title: "Addressing Kenya's Economic Challenges",
-      category: 'statement',
-      date: '2025-07-18',
-      excerpt: "Our comprehensive economic plan focuses on job creation, supporting small businesses, and ensuring sustainable growth that benefits every Kenyan. We will prioritize transparency in government spending and eliminate wasteful expenditure.",
-      readTime: '4 min read',
-      featured: false
-    },
-    {
-      id: 3,
-      title: "Speech at Kenya Ideas Festival",
-      category: 'speech',
-      date: '2025-07-15',
-      excerpt: "Kenya's future lies in the hands of its people. At the Kenya Ideas Festival, we outlined our vision for inclusive development, educational reform, and technological innovation that will propel Kenya into the next generation.",
-      readTime: '8 min read',
-      featured: true
-    },
-    {
-      id: 4,
-      title: "Youth Empowerment Initiative Announcement",
-      category: 'announcement',
-      date: '2025-07-12',
-      excerpt: "Launching a comprehensive youth empowerment program that will create 500,000 jobs over the next five years through skills training, entrepreneurship support, and technology innovation hubs across all 47 counties.",
-      readTime: '3 min read',
-      featured: false
-    },
-    {
-      id: 5,
-      title: "Healthcare Reform: A Right, Not a Privilege",
-      category: 'statement',
-      date: '2025-07-10',
-      excerpt: "Healthcare is a fundamental human right. Our administration will implement universal healthcare coverage, modernize medical facilities, and ensure no Kenyan suffers due to lack of access to quality medical care.",
-      readTime: '6 min read',
-      featured: false
-    },
-    {
-      id: 6,
-      title: "Education for All: Building Tomorrow's Leaders",
-      category: 'statement',
-      date: '2025-07-08',
-      excerpt: "Every child deserves quality education. We will increase education funding, improve teacher welfare, modernize curriculum to include digital skills, and ensure no child is left behind due to financial constraints.",
-      readTime: '5 min read',
-      featured: false
+  // Fetch all press releases
+  const fetchPressReleases = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+  
+      const response = await fetch(`${API_BASE}/press`, { headers: authHeader });
+  
+      if (response.status === 401 || response.status === 403) {
+        // Not authenticated → kick to login and remember where to come back
+        window.location.href = `/login?from=${encodeURIComponent(window.location.pathname)}`;
+        return;
+      }
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${response.statusText} — ${errorText}`);
+      }
+  
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Expected JSON response but received something else.');
+      }
+  
+      const data = await response.json();
+      const releases = data.data || data.pressReleases || data || [];
+      setPressReleases(Array.isArray(releases) ? releases : []);
+      setError(null);
+    } catch (err) {
+      const errorMessage = err.message.includes('fetch')
+        ? 'Unable to connect to server. Please check if the API server is running.'
+        : `API Error: ${err.message}`;
+      setError(errorMessage);
+      console.error('Error fetching press releases:', err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const filteredReleases = pressReleases.filter(release => {
-    const matchesCategory = selectedCategory === 'all' || release.category === selectedCategory;
-    const matchesSearch = release.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         release.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
+  // Fetch press releases by type
+  const fetchPressByType = async (type) => {
+    try {
+      setLoading(true);
+      console.log('Fetching by type:', `${API_BASE}/press/type/${type}`);
+      
+      
+      const response = await fetch(`${API_BASE}/press/type/${type}`, { headers: authHeader });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const responseText = await response.text();
+        console.error('Non-JSON response:', responseText);
+        throw new Error(`Expected JSON but received: ${contentType}`);
+      }
+      
+      const data = await response.json();
+      const releases = data.data || data.pressReleases || data || [];
+      setPressReleases(Array.isArray(releases) ? releases : []);
+      setError(null);
+    } catch (err) {
+      const errorMessage = err.message.includes('fetch') 
+        ? 'Unable to connect to server. Please check if the API server is running.'
+        : `API Error: ${err.message}`;
+      setError(errorMessage);
+      console.error('Error fetching press releases by type:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Search press releases
+  const searchPressReleases = async (query) => {
+    try {
+      setLoading(true);
+      console.log('Searching:', `${API_BASE}/press/search?q=${encodeURIComponent(query)}`);
+      
+      const response = await fetch(`${API_BASE}/press/search?q=${encodeURIComponent(query)}`, { headers: authHeader });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const responseText = await response.text();
+        console.error('Non-JSON response:', responseText);
+        throw new Error(`Expected JSON but received: ${contentType}`);
+      }
+      
+      const data = await response.json();
+      const releases = data.data || data.pressReleases || data || [];
+      setPressReleases(Array.isArray(releases) ? releases : []);
+      setError(null);
+    } catch (err) {
+      const errorMessage = err.message.includes('fetch') 
+        ? 'Unable to connect to server. Please check if the API server is running.'
+        : `API Error: ${err.message}`;
+      setError(errorMessage);
+      console.error('Error searching press releases:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchPressReleases();
+  }, []);
+
+  // Handle category change
+  useEffect(() => {
+    if (searchTerm.trim()) {
+      // If there's a search term, don't filter by category yet
+      return;
+    }
+    
+    if (selectedCategory === 'all') {
+      fetchPressReleases();
+    } else {
+      fetchPressByType(selectedCategory);
+    }
+  }, [selectedCategory]);
+
+  // Handle search with debouncing
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      if (searchTerm.trim()) {
+        searchPressReleases(searchTerm);
+      } else {
+        // When search is cleared, reapply the current category filter
+        if (selectedCategory === 'all') {
+          fetchPressReleases();
+        } else {
+          fetchPressByType(selectedCategory);
+        }
+      }
+    }, 500);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchTerm, selectedCategory]);
+
+  // Update category counts based on current data
+  const updatedCategories = categories.map(category => {
+    if (category.id === 'all') {
+      return { ...category, count: pressReleases.length };
+    }
+    
+    // Count releases of this type from the current data
+    const count = pressReleases.filter(release => 
+      release.type === category.id || 
+      release.category === category.id
+    ).length;
+    
+    return { ...category, count };
   });
 
   const formatDate = (dateString) => {
@@ -82,21 +193,58 @@ const Press = () => {
 
   const getCategoryIcon = (category) => {
     switch(category) {
-      case 'announcement': return '📢';
-      case 'statement': return '📋';
-      case 'speech': return '🎤';
+      case 'ANNOUNCEMENT': return '📢';
+      case 'PRESS RELEASE': return '📋';
+      case 'VIDEO': return '🎥';
       default: return '📰';
     }
   };
 
   const getCategoryColor = (category) => {
     switch(category) {
-      case 'announcement': return 'bg-blue-100 text-blue-800';
-      case 'statement': return 'bg-green-100 text-green-800';
-      case 'speech': return 'bg-red-100 text-red-800';
+      case 'ANNOUNCEMENT': return 'bg-blue-100 text-blue-800';
+      case 'PRESS RELEASE': return 'bg-green-100 text-green-800';
+      case 'VIDEO': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const handleReadMore = (pressId) => {
+    // Navigate to individual press release or open modal
+    // You can implement routing here based on your needs
+    window.open(`/press/${pressId}`, '_blank');
+  };
+
+  if (loading && pressReleases.length === 0) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading press releases...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && pressReleases.length === 0) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <span className="text-6xl mb-4 block">⚠️</span>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Press Releases</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={fetchPressReleases}
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const featuredReleases = pressReleases.filter(release => release.featured);
 
   return (
     <div className="bg-white min-h-screen">
@@ -129,14 +277,23 @@ const Press = () => {
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
                 <span className="text-gray-400">🔍</span>
               </div>
+              {loading && (
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                </div>
+              )}
             </div>
 
             {/* Category Filters */}
             <div className="flex flex-wrap gap-3">
-              {categories.map((category) => (
+              {updatedCategories.map((category) => (
                 <button
                   key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
+                  onClick={() => {
+                    console.log('Category clicked:', category.id);
+                    setSelectedCategory(category.id);
+                    setSearchTerm(''); // Clear search when changing category
+                  }}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
                     selectedCategory === category.id
                       ? 'bg-green-600 text-white'
@@ -151,19 +308,19 @@ const Press = () => {
         </div>
 
         {/* Featured Releases */}
-        {selectedCategory === 'all' && (
+        {selectedCategory === 'all' && featuredReleases.length > 0 && (
           <div className="mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-8">Featured Releases</h2>
             <div className="grid lg:grid-cols-2 gap-8">
-              {pressReleases.filter(release => release.featured).map((release) => (
-                <div key={release.id} className="bg-gradient-to-br from-green-50 to-red-50 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+              {featuredReleases.map((release) => (
+                <div key={release._id} className="bg-gradient-to-br from-green-50 to-red-50 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <div className="p-8">
                     <div className="flex items-center justify-between mb-4">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(release.category)}`}>
-                        <span className="mr-1">{getCategoryIcon(release.category)}</span>
-                        {release.category.charAt(0).toUpperCase() + release.category.slice(1)}
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(release.type)}`}>
+                        <span className="mr-1">{getCategoryIcon(release.type)}</span>
+                        {release.type?.charAt(0).toUpperCase() + release.type?.slice(1)}
                       </span>
-                      <span className="text-sm text-gray-500">{formatDate(release.date)}</span>
+                      <span className="text-sm text-gray-500">{formatDate(release.publishedAt || release.createdAt)}</span>
                     </div>
                     
                     <h3 className="text-2xl font-bold text-gray-900 mb-4 leading-tight">
@@ -171,14 +328,19 @@ const Press = () => {
                     </h3>
                     
                     <p className="text-gray-600 mb-6 leading-relaxed">
-                      {release.excerpt}
+                      {release.excerpt || release.content?.substring(0, 200) + '...'}
                     </p>
                     
                     <div className="flex items-center justify-between">
-                      <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200">
+                      <button 
+                        onClick={() => handleReadMore(release._id)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                      >
                         Read Full Release
                       </button>
-                      <span className="text-sm text-gray-500">{release.readTime}</span>
+                      <span className="text-sm text-gray-500">
+                        {release.readTime || Math.ceil((release.content?.length || 0) / 1000) + ' min read'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -192,27 +354,44 @@ const Press = () => {
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold text-gray-900">
               {selectedCategory === 'all' ? 'All Press Releases' : 
-               categories.find(cat => cat.id === selectedCategory)?.label}
+               updatedCategories.find(cat => cat.id === selectedCategory)?.label}
             </h2>
             <span className="text-gray-500">
-              {filteredReleases.length} release{filteredReleases.length !== 1 ? 's' : ''} found
+              {pressReleases.length} release{pressReleases.length !== 1 ? 's' : ''} found
             </span>
           </div>
 
+          {loading && (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading...</p>
+            </div>
+          )}
+
           <div className="space-y-6">
-            {filteredReleases.map((release) => (
-              <div key={release.id} className="bg-white border border-gray-200 rounded-lg hover:shadow-lg transition-shadow duration-300">
+            {pressReleases.map((release) => (
+              <div key={release._id} className="bg-white border border-gray-200 rounded-lg hover:shadow-lg transition-shadow duration-300">
                 <div className="p-6">
                   <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                     <div className="flex-grow">
                       <div className="flex items-center gap-3 mb-3">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(release.category)}`}>
-                          <span className="mr-1">{getCategoryIcon(release.category)}</span>
-                          {release.category.charAt(0).toUpperCase() + release.category.slice(1)}
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(release.type)}`}>
+                          <span className="mr-1">{getCategoryIcon(release.type)}</span>
+                          {release.type?.charAt(0).toUpperCase() + release.type?.slice(1)}
                         </span>
-                        <span className="text-sm text-gray-500">{formatDate(release.date)}</span>
+                        <span className="text-sm text-gray-500">{formatDate(release.publishedAt || release.createdAt)}</span>
                         <span className="text-sm text-gray-500">•</span>
-                        <span className="text-sm text-gray-500">{release.readTime}</span>
+                        <span className="text-sm text-gray-500">
+                          {release.readTime || Math.ceil((release.content?.length || 0) / 1000) + ' min read'}
+                        </span>
+                        {release.featured && (
+                          <>
+                            <span className="text-sm text-gray-500">•</span>
+                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-medium">
+                              Featured
+                            </span>
+                          </>
+                        )}
                       </div>
                       
                       <h3 className="text-xl font-bold text-gray-900 mb-3 hover:text-green-600 cursor-pointer">
@@ -220,12 +399,25 @@ const Press = () => {
                       </h3>
                       
                       <p className="text-gray-600 leading-relaxed mb-4">
-                        {release.excerpt}
+                        {release.excerpt || release.content?.substring(0, 200) + '...'}
                       </p>
+
+                      {release.tags && release.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {release.tags.map((tag, index) => (
+                            <span key={index} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     
                     <div className="flex-shrink-0">
-                      <button className="bg-gray-100 hover:bg-green-600 hover:text-white text-gray-700 px-4 py-2 rounded-lg font-medium transition-all duration-200">
+                      <button 
+                        onClick={() => handleReadMore(release._id)}
+                        className="bg-gray-100 hover:bg-green-600 hover:text-white text-gray-700 px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                      >
                         Read More
                       </button>
                     </div>
@@ -235,11 +427,13 @@ const Press = () => {
             ))}
           </div>
 
-          {filteredReleases.length === 0 && (
+          {pressReleases.length === 0 && !loading && (
             <div className="text-center py-16">
               <span className="text-6xl mb-4 block">📭</span>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">No releases found</h3>
-              <p className="text-gray-600">Try adjusting your search terms or filters.</p>
+              <p className="text-gray-600">
+                {searchTerm ? 'Try adjusting your search terms.' : 'No press releases available at the moment.'}
+              </p>
             </div>
           )}
         </div>
