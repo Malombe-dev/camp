@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 
 
-const API_BASE = process.env.API_BASE_URL || 'https://server-mern-zc6l.onrender.com/api';
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://server-mern-zc6l.onrender.com/api';
+
 
 
 export default function Login() {
