@@ -15,7 +15,9 @@ import {
   Image
 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
+
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://server-mern-zc6l.onrender.com';
+
 
 const PressAdmin = () => {
   /* ---------- State ---------- */
@@ -111,7 +113,7 @@ const PressAdmin = () => {
   const fetchPress = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE}/press`, {
+      const res = await fetch(`${API_BASE}/api//press`, {
         headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
       const { data } = await res.json();
@@ -124,7 +126,7 @@ const PressAdmin = () => {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch(`${API_BASE}/press/stats`, {
+      const res = await fetch(`${API_BASE}/api/press/stats`, {
         headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
       const { data } = await res.json();
@@ -331,8 +333,8 @@ const PressAdmin = () => {
       }
 
       const url = modalType === 'create' 
-        ? `${API_BASE}/press` 
-        : `${API_BASE}/press/${selectedPress._id}`;
+        ? `${API_BASE}/api/press` 
+        : `${API_BASE}/api/press/${selectedPress._id}`;
       const method = modalType === 'create' ? 'POST' : 'PUT';
 
       const controller = new AbortController();
@@ -378,7 +380,7 @@ const PressAdmin = () => {
   const handleDelete = async id => {
     if (!window.confirm('Delete this press release?')) return;
     try {
-      const res = await fetch(`${API_BASE}/press/${id}`, {
+      const res = await fetch(`${API_BASE}/api/press/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
@@ -394,7 +396,7 @@ const PressAdmin = () => {
   /* ---------- Toggle featured ---------- */
   const toggleFeatured = async id => {
     try {
-      const res = await fetch(`${API_BASE}/press/${id}/featured`, {
+      const res = await fetch(`${API_BASE}/api/press/${id}/featured`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
