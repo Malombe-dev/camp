@@ -126,7 +126,7 @@ const PressAdmin = () => {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/press/stats`, {
+      const res = await fetch(`${API_BASE}/api/press/stats/analytics`, {
         headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
       const { data } = await res.json();
