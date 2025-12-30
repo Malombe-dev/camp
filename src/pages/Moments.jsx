@@ -1,103 +1,184 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Eye, Heart, Calendar, MapPin, Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://server-mern-zc6l.onrender.com';
 
 const Moments = () => {
+  const [moments, setMoments] = useState([]);
+  const [filteredMoments, setFilteredMoments] = useState([]);
+  const [categoryCounts, setCategoryCounts] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedImage, setSelectedImage] = useState(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 24,
+    total: 0,
+    pages: 1
+  });
 
   const categories = [
-    { id: 'all', label: 'All Moments', count: 24 },
-    { id: 'campaign', label: 'Campaign Events', count: 8 },
-    { id: 'community', label: 'Community Visits', count: 7 },
-    { id: 'speeches', label: 'Speeches & Rallies', count: 6 },
-    { id: 'meetings', label: 'Meetings', count: 3 }
+    { id: 'all', label: 'All Coverage', emoji: '📸' },
+    { id: 'campaign', label: 'Political Coverage', emoji: '🎯' },
+    { id: 'community', label: 'Community Events', emoji: '🤝' },
+    { id: 'speeches', label: 'Speeches & Forums', emoji: '🎤' },
+    { id: 'meetings', label: 'County Meetings', emoji: '💼' }
   ];
 
-  const moments = [
-    {
-      id: 1,
-      title: "Campaign Launch at Kenya Ideas Festival",
-      category: 'campaign',
-      date: '2025-07-20',
-      location: 'Nairobi',
-      description: "Official campaign launch with thousands of supporters. A historic moment marking the beginning of Kenya's transformation journey.",
-      image: "🏟️",
-      featured: true
-    },
-    {
-      id: 2,
-      title: "Meeting with Youth Leaders",
-      category: 'meetings',
-      date: '2025-07-18',
-      location: 'Kisumu',
-      description: "Engaging with young leaders to discuss employment opportunities, entrepreneurship support, and education reforms.",
-      image: "👥",
-      featured: true
-    },
-    {
-      id: 3,
-      title: "Community Visit in Turkana",
-      category: 'community',
-      date: '2025-07-15',
-      location: 'Turkana',
-      description: "Understanding the challenges faced by pastoralist communities and discussing sustainable development solutions.",
-      image: "🏘️",
-      featured: false
-    },
-    {
-      id: 4,
-      title: "Economic Forum Address",
-      category: 'speeches',
-      date: '2025-07-12',
-      location: 'Mombasa',
-      description: "Presenting comprehensive economic policies to business leaders and stakeholders at the Coast Economic Forum.",
-      image: "💼",
-      featured: true
-    },
-    {
-      id: 5,
-      title: "Healthcare Workers Appreciation",
-      category: 'community',
-      date: '2025-07-10',
-      location: 'Eldoret',
-      description: "Recognizing the dedication of healthcare workers and outlining plans for healthcare system improvement.",
-      image: "🏥",
-      featured: false
-    },
-    {
-      id: 6,
-      title: "University Students Rally",
-      category: 'speeches',
-      date: '2025-07-08',
-      location: 'Nakuru',
-      description: "Addressing university students on education reform, research funding, and career opportunities.",
-      image: "🎓",
-      featured: false
-    },
-    {
-      id: 7,
-      title: "Farmers' Meeting in Meru",
-      category: 'meetings',
-      date: '2025-07-05',
-      location: 'Meru',
-      description: "Discussing agricultural policies, subsidies, and market access with farming communities.",
-      image: "🌾",
-      featured: false
-    },
-    {
-      id: 8,
-      title: "Women Leaders Summit",
-      category: 'campaign',
-      date: '2025-07-02',
-      location: 'Nairobi',
-      description: "Engaging with women leaders on gender equality, women empowerment, and inclusive governance.",
-      image: "👩‍💼",
-      featured: true
+  // Get media URLs from moment (handles both single and multiple)
+  const getMediaUrls = (moment) => {
+    if (moment.mediaUrls && moment.mediaUrls.length > 0) {
+      return moment.mediaUrls;
+    } else if (moment.mediaUrl) {
+      return [moment.mediaUrl];
     }
-  ];
+    return [];
+  };
 
-  const filteredMoments = moments.filter(moment => {
-    return selectedCategory === 'all' || moment.category === selectedCategory;
-  });
+  // Fetch gallery items
+  const fetchMoments = async (category = 'all', page = 1, search = '') => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      let url = `${API_BASE}/api/gallery?page=${page}&limit=24`;
+      
+      if (category !== 'all') {
+        url += `&category=${category}`;
+      }
+      
+      if (search) {
+        url += `&search=${encodeURIComponent(search)}`;
+      }
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.success) {
+        setMoments(data.data || []);
+        setFilteredMoments(data.data || []);
+        setCategoryCounts(data.categoryCounts || {});
+        setPagination(data.pagination || {
+          page: 1,
+          limit: 24,
+          total: 0,
+          pages: 1
+        });
+      } else {
+        setError('Failed to load coverage');
+      }
+    } catch (err) {
+      console.error('Error fetching coverage:', err);
+      setError('Failed to load coverage. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Increment view count when viewing a moment
+  const handleViewMoment = async (moment) => {
+    try {
+      // Increment view on backend
+      const response = await fetch(`${API_BASE}/api/gallery/${moment._id}`, {
+        method: 'GET'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Update local state with the response from backend
+        setMoments(prevMoments => 
+          prevMoments.map(m => 
+            m._id === moment._id 
+              ? { ...m, views: data.data.views }
+              : m
+          )
+        );
+
+        setSelectedImage(data.data);
+        setCurrentSlide(0); // Reset carousel to first slide
+      }
+    } catch (err) {
+      console.error('Error tracking view:', err);
+      // Still show the modal even if view tracking fails
+      setSelectedImage(moment);
+      setCurrentSlide(0);
+    }
+  };
+
+  // Handle like - FIXED VERSION
+  const handleLike = async (momentId, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    try {
+      console.log('Liking moment:', momentId);
+      
+      const response = await fetch(`${API_BASE}/api/gallery/${momentId}/like`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('Like response status:', response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Like response data:', data);
+        
+        const newLikes = data.data.likes;
+        
+        // Update moments list
+        setMoments(prevMoments =>
+          prevMoments.map(m =>
+            m._id === momentId
+              ? { ...m, likes: newLikes }
+              : m
+          )
+        );
+
+        // Update filtered moments
+        setFilteredMoments(prevMoments =>
+          prevMoments.map(m =>
+            m._id === momentId
+              ? { ...m, likes: newLikes }
+              : m
+          )
+        );
+
+        // Update selected image if it's currently open
+        if (selectedImage && selectedImage._id === momentId) {
+          setSelectedImage(prev => ({ ...prev, likes: newLikes }));
+        }
+      } else {
+        const errorText = await response.text();
+        console.error('Like failed:', errorText);
+      }
+    } catch (err) {
+      console.error('Error liking moment:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchMoments(selectedCategory, pagination.page, searchTerm);
+  }, [selectedCategory, pagination.page]);
+
+  // Handle search with debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchTerm !== undefined) {
+        fetchMoments(selectedCategory, 1, searchTerm);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -115,58 +196,106 @@ const Moments = () => {
   };
 
   const getCategoryIcon = (category) => {
-    switch(category) {
-      case 'campaign': return '🎯';
-      case 'community': return '🤝';
-      case 'speeches': return '🎤';
-      case 'meetings': return '🤝';
-      default: return '📸';
+    const cat = categories.find(c => c.id === category);
+    return cat ? cat.emoji : '📸';
+  };
+
+  const handleLoadMore = () => {
+    if (pagination.page < pagination.pages) {
+      setPagination(prev => ({ ...prev, page: prev.page + 1 }));
     }
+  };
+
+  // Carousel navigation
+  const nextSlide = () => {
+    const mediaUrls = getMediaUrls(selectedImage);
+    setCurrentSlide((prev) => (prev + 1) % mediaUrls.length);
+  };
+
+  const prevSlide = () => {
+    const mediaUrls = getMediaUrls(selectedImage);
+    setCurrentSlide((prev) => (prev - 1 + mediaUrls.length) % mediaUrls.length);
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-600 to-blue-600 text-white py-20">
+      <section className="bg-gradient-to-br from-green-600 to-red-600 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">Campaign Moments</h1>
+          <h1 className="text-5xl md:text-6xl font-bold mb-6">Coverage Gallery</h1>
           <p className="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto">
-            Capturing the journey of transformation across every corner of Kenya
+            Documenting governance, community events, and civic engagement across Machakos County
           </p>
-          <div className="mt-8 flex justify-center space-x-4">
-            <div className="text-center">
-              <div className="text-3xl font-bold">47</div>
-              <div className="text-sm opacity-80">Counties Visited</div>
+          {categoryCounts && (
+            <div className="mt-8 flex justify-center space-x-8">
+              <div className="text-center">
+                <div className="text-3xl font-bold">{categoryCounts.all || 0}</div>
+                <div className="text-sm opacity-80">Total Coverage</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold">
+                  {moments.reduce((sum, m) => sum + (m.views || 0), 0)}
+                </div>
+                <div className="text-sm opacity-80">Total Views</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold">
+                  {moments.reduce((sum, m) => sum + (m.likes || 0), 0)}
+                </div>
+                <div className="text-sm opacity-80">Community Engagement</div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold">100+</div>
-              <div className="text-sm opacity-80">Events</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold">50K+</div>
-              <div className="text-sm opacity-80">Kenyans Engaged</div>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 
-      {/* Category Filter */}
-      <section className="py-8 bg-white shadow-sm">
+      {/* Search and Filter Section */}
+      <section className="py-8 bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4">
+          {/* Search Bar */}
+          <div className="mb-4">
+            <div className="relative max-w-xl mx-auto">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                placeholder="Search coverage by title, description, or location..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-full focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X size={20} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Category Filters */}
           <div className="flex flex-wrap justify-center gap-3">
             {categories.map((category) => (
               <button
                 key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
+                onClick={() => {
+                  setSelectedCategory(category.id);
+                  setPagination(prev => ({ ...prev, page: 1 }));
+                }}
                 className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
                   selectedCategory === category.id
                     ? 'bg-green-600 text-white shadow-lg transform scale-105'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                <span className="mr-2">{getCategoryIcon(category.id)}</span>
+                <span className="mr-2">{category.emoji}</span>
                 {category.label}
-                <span className="ml-2 text-sm opacity-75">({category.count})</span>
+                {categoryCounts && categoryCounts[category.id] !== undefined && (
+                  <span className="ml-2 text-sm opacity-75">
+                    ({category.id === 'all' ? categoryCounts.all : categoryCounts[category.id]})
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -176,71 +305,219 @@ const Moments = () => {
       {/* Moments Grid */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredMoments.map((moment) => (
-              <div
-                key={moment.id}
-                className={`bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 ${
-                  moment.featured ? 'ring-2 ring-green-500' : ''
-                }`}
+          {loading && moments.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="inline-block w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+              <p className="text-gray-600 text-lg">Loading coverage...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-20">
+              <div className="text-red-500 text-6xl mb-4">⚠️</div>
+              <p className="text-gray-600 text-lg mb-4">{error}</p>
+              <button
+                onClick={() => fetchMoments(selectedCategory, pagination.page, searchTerm)}
+                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
               >
-                {/* Image Placeholder with Emoji */}
-                <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-6xl">
-                  {moment.image}
-                </div>
+                Try Again
+              </button>
+            </div>
+          ) : filteredMoments.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="text-gray-400 text-6xl mb-4">📸</div>
+              <p className="text-gray-600 text-lg">No coverage found</p>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="mt-4 text-green-600 hover:text-green-700 font-medium"
+                >
+                  Clear search
+                </button>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredMoments.map((moment) => {
+                  const mediaUrls = getMediaUrls(moment);
+                  const firstMedia = mediaUrls[0];
 
-                {/* Content */}
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(moment.category)}`}>
-                      {moment.category.charAt(0).toUpperCase() + moment.category.slice(1)}
-                    </span>
-                    {moment.featured && (
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
-                        Featured
-                      </span>
-                    )}
-                  </div>
+                  return (
+                    <div
+                      key={moment._id}
+                      className={`bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 cursor-pointer ${
+                        moment.featured ? 'ring-2 ring-green-500' : ''
+                      }`}
+                      onClick={() => handleViewMoment(moment)}
+                    >
+                      {/* Image */}
+                      <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative overflow-hidden">
+                        {firstMedia ? (
+                          firstMedia.resourceType === 'video' ? (
+                            <video
+                              src={firstMedia.url}
+                              className="w-full h-full object-cover"
+                              muted
+                            />
+                          ) : (
+                            <img
+                              src={firstMedia.url}
+                              alt={moment.title}
+                              className="w-full h-full object-cover"
+                            />
+                          )
+                        ) : (
+                          <div className="text-6xl">{moment.image || '📸'}</div>
+                        )}
+                        
+                        {/* Multiple images indicator */}
+                        {mediaUrls.length > 1 && (
+                          <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                            📷 {mediaUrls.length}
+                          </div>
+                        )}
+                        
+                        {/* View and Like counters overlay */}
+                        <div className="absolute bottom-2 right-2 flex gap-2">
+                          <span className="bg-black bg-opacity-70 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
+                            <Eye size={12} /> {moment.views || 0}
+                          </span>
+                          <span className="bg-black bg-opacity-70 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
+                            <Heart size={12} /> {moment.likes || 0}
+                          </span>
+                        </div>
+                      </div>
 
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{moment.title}</h3>
-                  <p className="text-gray-600 text-sm mb-3 leading-relaxed">{moment.description}</p>
+                      {/* Content */}
+                      <div className="p-6">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(moment.category)}`}>
+                            {getCategoryIcon(moment.category)} {moment.category.charAt(0).toUpperCase() + moment.category.slice(1)}
+                          </span>
+                          {moment.featured && (
+                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
+                              ⭐ Featured
+                            </span>
+                          )}
+                        </div>
 
-                  <div className="flex items-center text-sm text-gray-500 mb-4">
-                    <span className="mr-4">📍 {moment.location}</span>
-                    <span>📅 {formatDate(moment.date)}</span>
-                  </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">{moment.title}</h3>
+                        <p className="text-gray-600 text-sm mb-3 leading-relaxed line-clamp-3">{moment.description}</p>
 
+                        <div className="flex items-center text-sm text-gray-500 mb-4 gap-4">
+                          <span className="flex items-center gap-1">
+                            <MapPin size={14} /> {moment.location}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Calendar size={14} /> {formatDate(moment.date)}
+                          </span>
+                        </div>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewMoment(moment);
+                          }}
+                          className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors duration-300"
+                        >
+                          View Full Coverage
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Load More Button */}
+              {pagination.page < pagination.pages && (
+                <div className="text-center mt-12">
                   <button
-                    onClick={() => setSelectedImage(moment)}
-                    className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors duration-300"
+                    onClick={handleLoadMore}
+                    disabled={loading}
+                    className="bg-gray-200 text-gray-800 px-8 py-3 rounded-full font-semibold hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    View Details
+                    {loading ? 'Loading...' : `Load More (${pagination.page} of ${pagination.pages})`}
                   </button>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Load More Button */}
-          <div className="text-center mt-12">
-            <button className="bg-gray-200 text-gray-800 px-8 py-3 rounded-full font-semibold hover:bg-gray-300 transition-colors">
-              Load More Moments
-            </button>
-          </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 
-      {/* Image Modal */}
+      {/* Image Modal with Carousel */}
       {selectedImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-90vh overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="relative">
-              <div className="h-64 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-8xl">
-                {selectedImage.image}
+              {/* Carousel */}
+              <div className="relative h-96 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                {(() => {
+                  const mediaUrls = getMediaUrls(selectedImage);
+                  const currentMedia = mediaUrls[currentSlide];
+                  
+                  return currentMedia ? (
+                    currentMedia.resourceType === 'video' ? (
+                      <video
+                        src={currentMedia.url}
+                        controls
+                        className="w-full h-full object-contain"
+                        key={currentSlide}
+                      />
+                    ) : (
+                      <img
+                        src={currentMedia.url}
+                        alt={`${selectedImage.title} - ${currentSlide + 1}`}
+                        className="w-full h-full object-contain"
+                      />
+                    )
+                  ) : (
+                    <div className="text-8xl">{selectedImage.image || '📸'}</div>
+                  );
+                })()}
+
+                {/* Carousel Navigation */}
+                {getMediaUrls(selectedImage).length > 1 && (
+                  <>
+                    <button
+                      onClick={prevSlide}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-colors"
+                    >
+                      <ChevronLeft size={24} />
+                    </button>
+                    <button
+                      onClick={nextSlide}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-colors"
+                    >
+                      <ChevronRight size={24} />
+                    </button>
+                    
+                    {/* Slide Indicators */}
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                      {getMediaUrls(selectedImage).map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentSlide(index)}
+                          className={`w-2 h-2 rounded-full transition-all ${
+                            index === currentSlide 
+                              ? 'bg-white w-8' 
+                              : 'bg-white bg-opacity-50'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    
+                    {/* Counter */}
+                    <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                      {currentSlide + 1} / {getMediaUrls(selectedImage).length}
+                    </div>
+                  </>
+                )}
               </div>
+
+              {/* Close Button */}
               <button
                 onClick={() => setSelectedImage(null)}
-                className="absolute top-4 right-4 bg-black bg-opacity-50 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-opacity-75 transition-colors"
+                className="absolute top-4 right-4 bg-black bg-opacity-50 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-opacity-75 transition-colors z-10"
               >
                 ✕
               </button>
@@ -249,24 +526,46 @@ const Moments = () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getCategoryColor(selectedImage.category)}`}>
-                  {selectedImage.category.charAt(0).toUpperCase() + selectedImage.category.slice(1)}
+                  {getCategoryIcon(selectedImage.category)} {selectedImage.category.charAt(0).toUpperCase() + selectedImage.category.slice(1)}
                 </span>
-                <span className="text-sm text-gray-500">📅 {formatDate(selectedImage.date)}</span>
+                <span className="text-sm text-gray-500 flex items-center gap-1">
+                  <Calendar size={16} /> {formatDate(selectedImage.date)}
+                </span>
               </div>
 
               <h2 className="text-2xl font-bold text-gray-900 mb-3">{selectedImage.title}</h2>
               <p className="text-gray-600 mb-4 leading-relaxed">{selectedImage.description}</p>
 
-              <div className="flex items-center text-gray-600 mb-4">
-                <span className="mr-4">📍 {selectedImage.location}</span>
+              <div className="flex items-center text-gray-600 mb-4 gap-4">
+                <span className="flex items-center gap-1">
+                  <MapPin size={18} /> {selectedImage.location}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Eye size={18} /> {selectedImage.views || 0} views
+                </span>
+                <span className="flex items-center gap-1">
+                  <Heart size={18} /> {selectedImage.likes || 0} engagements
+                </span>
               </div>
 
+              {selectedImage.photographer?.name && (
+                <div className="text-sm text-gray-500 mb-4 border-t pt-4">
+                  <p>📷 Photo by: {selectedImage.photographer.name}</p>
+                  {selectedImage.photographer.credit && (
+                    <p className="text-xs mt-1">{selectedImage.photographer.credit}</p>
+                  )}
+                </div>
+              )}
+
               <div className="flex space-x-4">
-                <button className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">
-                  Share Moment
+                <button
+                  onClick={(e) => handleLike(selectedImage._id, e)}
+                  className="flex-1 bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Heart size={18} /> Engage ({selectedImage.likes || 0})
                 </button>
-                <button className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors">
-                  Download
+                <button className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors">
+                  Share Coverage
                 </button>
               </div>
             </div>

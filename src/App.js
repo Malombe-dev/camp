@@ -15,18 +15,21 @@ import ProtectedRoute from './utils/protectedRoute';
 import VideoPlayer from './components/media/VideoPlayer';
 import './VideoPlayer.css';
 import PressRelease from './pages/PressRelease';
+import GalleryManager from './admin/components/GalleryAdmin';
+import AdminDashboard from './admin/components/AdminDashboard';
 
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfUse from './pages/TermsOfUse';
+import EditorialPolicy from './pages/EditorialPolicy';
 
-// import NotFound from './pages/NotFound';
 
 function App() {
-
-  
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
       <main className="flex-grow">
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/press" element={<Press />} />
@@ -36,16 +39,50 @@ function App() {
           <Route path="/donate" element={<Donate />} />  
           <Route path="/login" element={<Login />} />
           <Route path="/press/:id" element={<PressRelease />} />
-          {/* <Route path="*" element={<NotFound />} /> */}
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfUse />} />
+          <Route path="/editorial-policy" element={<EditorialPolicy />} />
+          
+          {/* Protected Admin Routes */}
           <Route
-              path="/pressadmin"
-              element={
-                <ProtectedRoute allowedRoles={['communications', 'super-admin']}>
-                  <PressAdmin />
-                </ProtectedRoute>
-              }
-            />
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={['communications', 'super-admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/admin/press"
+            element={
+              <ProtectedRoute allowedRoles={['communications', 'super-admin']}>
+                <PressAdmin />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/admin/gallery"
+            element={
+              <ProtectedRoute allowedRoles={['communications', 'super-admin']}>
+                <GalleryManager />
+              </ProtectedRoute>
+            }
+          />
 
+          {/* Legacy route - redirect to new admin */}
+          <Route
+            path="/pressadmin"
+            element={
+              <ProtectedRoute allowedRoles={['communications', 'super-admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* 404 - Uncomment when ready */}
+          {/* <Route path="*" element={<NotFound />} /> */}
         </Routes>
       </main>
       <Footer />

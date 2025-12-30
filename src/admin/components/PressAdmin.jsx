@@ -14,7 +14,7 @@ import {
   Video,
   Image
 } from 'lucide-react';
-
+import AdminNavbar from './AdminNavbar';
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://server-mern-zc6l.onrender.com';
 
@@ -512,6 +512,7 @@ const PressAdmin = () => {
   /* ---------- Render ---------- */
   return (
     <div className="min-h-screen bg-gray-50">
+      <AdminNavbar/>
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

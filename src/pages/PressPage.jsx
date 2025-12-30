@@ -455,7 +455,7 @@ const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://server-mern-zc6l
                 <span className="text-2xl">📧</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Email</h3>
-              <p className="text-gray-600">press@campaign2027.ke</p>
+              <p className="text-gray-600">info@civicvoice-machakos.ke</p>
             </div>
             
             <div>
@@ -463,7 +463,7 @@ const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://server-mern-zc6l
                 <span className="text-2xl">📱</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Phone</h3>
-              <p className="text-gray-600">+254 700 000 000</p>
+              <p className="text-gray-600">+254 793 830 0795</p>
             </div>
             
             <div>

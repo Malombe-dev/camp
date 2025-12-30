@@ -26,12 +26,10 @@ const Navbar = () => {
 
   const navItems = [
     { id: "/", label: "Home", icon: "🏠" },
-    { id: "/about", label: "About", icon: "👤" },
-    { id: "/press", label: "Press", icon: "📰" },
-    { id: "/moments", label: "Moments", icon: "📸" },
-    { id: "/join", label: "Join Us", icon: "🤝" },
+    { id: "/about", label: "About", icon: "ℹ️" },
+    { id: "/press", label: "News", icon: "📰" },
+    { id: "/moments", label: "Gallery", icon: "📸" },
     { id: "/contact", label: "Contact", icon: "📞" },
-    { id: "/donate", label: "Donate", icon: "💝" },
     { id: "/pressadmin", label: "Admin", icon: "⚙️", guard: true },
   ];
 
@@ -55,7 +53,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center">
             <div className="text-white font-bold text-xl">
-              🇰🇪 <span className="ml-2">Campaign 2027</span>
+              🗣️ <span className="ml-2">Civic Voice - Machakos</span>
             </div>
           </Link>
 
@@ -159,6 +157,15 @@ const Navbar = () => {
           </div>
         </div>
       )}
+
+      {/* Disclaimer Banner */}
+      <div className="bg-yellow-50 border-b border-yellow-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+          <p className="text-xs text-gray-700 text-center">
+            <strong>Independent Platform:</strong> Civic Voice – Machakos Chapter is not affiliated with any political party, government institution, or electoral body.
+          </p>
+        </div>
+      </div>
     </nav>
   );
 };
