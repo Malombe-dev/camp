@@ -52,6 +52,7 @@ export const endpoints = {
   media: '/api/media',
   contact: '/api/contact',
   events: '/api/events',
+  galleryRoutes: '/api/galleryRoutes',
 };
 
 export default apiRequest;
