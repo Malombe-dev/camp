@@ -1,17 +1,40 @@
-// src/components/ProtectedRoute.jsx
-import { Navigate, useLocation } from 'react-router-dom';
+import React from 'react';
+import NotFound from '../pages/NotFound';
 
-export default function ProtectedRoute({ children, allowedRoles = ['super-admin', 'communications'] }) {
+const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const token = localStorage.getItem('token');
-  const user  = token ? JSON.parse(atob(token.split('.')[1])) : null;
-  const location = useLocation();
 
-  // Debugging log:
-  console.log("User role from token:", user?.role);
-
-  if (!token || !allowedRoles.includes(user?.role)) {
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  // If no token, show NotFound page
+  if (!token) {
+    return <NotFound />;
   }
 
-  return children;
-}
+  try {
+    // Decode JWT token
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    
+    // Check for role in different possible fields
+    const userRole = payload.role || payload.userRole || payload.type || 'user';
+    console.log('User role from token:', userRole);
+
+    // If no specific roles are required, allow access
+    if (allowedRoles.length === 0) {
+      return children;
+    }
+
+    // Check if user's role is in allowed roles
+    if (allowedRoles.includes(userRole)) {
+      return children;
+    }
+
+    // If logged in but wrong role, show NotFound
+    return <NotFound />;
+    
+  } catch (error) {
+    console.error('Error decoding token:', error);
+    localStorage.removeItem('token');
+    return <NotFound />;
+  }
+};
+
+export default ProtectedRoute;

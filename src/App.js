@@ -1,6 +1,3 @@
-// ==========================================
-// UPDATED App.js
-// ==========================================
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import PublicLayout from './layouts/PublicLayout';
@@ -27,35 +24,12 @@ import AdminDashboard from './admin/components/AdminDashboard';
 import ProtectedRoute from './utils/protectedRoute';
 
 function App() {
-  // Check if user is logged in
   const isAuthenticated = () => {
     return !!localStorage.getItem('token');
   };
 
   return (
     <Routes>
-      {/* Public Routes with Navbar & Footer */}
-      <Route
-        path="/*"
-        element={
-          <PublicLayout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/press" element={<Press />} />
-              <Route path="/press/:id" element={<PressRelease />} />
-              <Route path="/moments" element={<Moments />} />
-              <Route path="/join" element={<Join />} />
-              <Route path="/contact" element={<ContactForm />} />
-              <Route path="/donate" element={<Donate />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-              <Route path="/terms" element={<TermsOfUse />} />
-              <Route path="/editorial-policy" element={<EditorialPolicy />} />
-            </Routes>
-          </PublicLayout>
-        }
-      />
-
       {/* Login Page (No Layout) */}
       <Route 
         path="/login" 
@@ -65,52 +39,64 @@ function App() {
       />
 
       {/* Admin Routes WITHOUT Navbar & Footer */}
-      <Route
-        path="/admin/*"
-        element={
-          <AdminLayout>
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute allowedRoles={['communications', 'super-admin']}>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/press"
-                element={
-                  <ProtectedRoute allowedRoles={['communications', 'super-admin']}>
-                    <PressAdmin />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/gallery"
-                element={
-                  <ProtectedRoute allowedRoles={['communications', 'super-admin']}>
-                    <GalleryManager />
-                  </ProtectedRoute>
-                }
-              />
-              {/* Admin 404 for logged-in users */}
-              <Route path="*" element={<AdminNotFound />} />
-            </Routes>
-          </AdminLayout>
-        }
-      />
+      <Route path="/admin/*" element={
+        <AdminLayout>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="press"
+              element={
+                <ProtectedRoute>
+                  <PressAdmin />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="gallery"
+              element={
+                <ProtectedRoute>
+                  <GalleryManager />
+                </ProtectedRoute>
+              }
+            />
+            {/* Admin 404 - only shows for logged-in users */}
+            <Route 
+              path="*" 
+              element={
+                <ProtectedRoute>
+                  <AdminNotFound />
+                </ProtectedRoute>
+              } 
+            />
+          </Routes>
+        </AdminLayout>
+      } />
 
       {/* Legacy redirect */}
-      <Route
-        path="/pressadmin"
-        element={
-          <Navigate to="/admin" replace />
-        }
-      />
+      <Route path="/pressadmin" element={<Navigate to="/admin" replace />} />
 
-      {/* 404 - Catch all other routes */}
-      <Route path="*" element={<NotFound />} />
+      {/* Public Routes with Navbar & Footer - ALL ROUTES PRESERVED */}
+      <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+      <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
+      <Route path="/press" element={<PublicLayout><Press /></PublicLayout>} />
+      <Route path="/press/:id" element={<PublicLayout><PressRelease /></PublicLayout>} />
+      <Route path="/moments" element={<PublicLayout><Moments /></PublicLayout>} />
+      <Route path="/join" element={<PublicLayout><Join /></PublicLayout>} />
+      <Route path="/contact" element={<PublicLayout><ContactForm /></PublicLayout>} />
+      <Route path="/donate" element={<PublicLayout><Donate /></PublicLayout>} />
+      <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
+      <Route path="/terms" element={<PublicLayout><TermsOfUse /></PublicLayout>} />
+      <Route path="/editorial-policy" element={<PublicLayout><EditorialPolicy /></PublicLayout>} />
+
+      {/* 404 - Catch ALL other undefined routes */}
+      <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
     </Routes>
   );
 }
