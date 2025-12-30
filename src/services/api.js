@@ -3,9 +3,10 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://server-mern-zc6l.onrender.com';
 
-// Create axios instance with /api prefix
+
+// Create axios instance
 export const apiRequest = axios.create({
-  baseURL: `${API_BASE_URL}/api`, // Add /api here
+  baseURL: API_BASE_URL,
   timeout: 100000,
   headers: {
     'Content-Type': 'application/json',
@@ -44,14 +45,14 @@ apiRequest.interceptors.response.use(
   }
 );
 
-// API endpoints - remove /api prefix since it's in baseURL now
+// API endpoints - these match your backend routes exactly
 export const endpoints = {
-  press: '/press',
-  volunteers: '/volunteers',
-  media: '/media',
-  contact: '/contact',
-  events: '/events',
-  gallery: '/gallery', 
+  press: '/api/press',
+  volunteers: '/api/volunteers',
+  media: '/api/media',
+  contact: '/api/contact',
+  events: '/api/events',
+  galleryRoutes: '/api/gallery',
 };
 
 export default apiRequest;
