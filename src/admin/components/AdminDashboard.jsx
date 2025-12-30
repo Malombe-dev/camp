@@ -29,7 +29,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api' || 'https://server-mern-zc6l.onrender.com';
+  const API_BASE_URL = process.env.REACT_APP_API_URL ||'https://server-mern-zc6l.onrender.com';
 
   useEffect(() => {
     fetchDashboardData();
