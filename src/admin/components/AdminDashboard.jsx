@@ -52,7 +52,7 @@ const AdminDashboard = () => {
       let pressViews = 0;
       let totalPress = 0;
       try {
-        const pressStatsRes = await fetch(`${API_BASE_URL}/press/stats`, {
+        const pressStatsRes = await fetch(`${API_BASE_URL}/api/press/stats`, {
           headers: getAuthHeaders()
         });
         
@@ -75,7 +75,7 @@ const AdminDashboard = () => {
 
       // Fetch all press to get accurate view count
       try {
-        const pressRes = await fetch(`${API_BASE_URL}/press?published=true&limit=1000`, {
+        const pressRes = await fetch(`${API_BASE_URL}/api/press?published=true&limit=1000`, {
           headers: getAuthHeaders()
         });
         
@@ -110,7 +110,7 @@ const AdminDashboard = () => {
       let galleryViews = 0;
       let totalGallery = 0;
       try {
-        const galleryRes = await fetch(`${API_BASE_URL}/gallery?limit=1000`, {
+        const galleryRes = await fetch(`${API_BASE_URL}/api/gallery?limit=1000`, {
           headers: getAuthHeaders()
         });
         
@@ -150,7 +150,7 @@ const AdminDashboard = () => {
       let mediaViews = 0;
       let totalMedia = 0;
       try {
-        const mediaStatsRes = await fetch(`${API_BASE_URL}/media/stats/analytics`, {
+        const mediaStatsRes = await fetch(`${API_BASE_URL}/api/media/stats/analytics`, {
           headers: getAuthHeaders()
         });
         
