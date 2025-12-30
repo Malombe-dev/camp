@@ -53,7 +53,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center">
             <div className="text-white font-bold text-xl">
-              🗣️ <span className="ml-2">Civic Voice - Machakos</span>
+              🗣️ <span className="ml-2">Civic Voice | Machakos Chapter</span>
             </div>
           </Link>
 
