@@ -59,7 +59,16 @@ const About = () => {
           <div className="text-center">
             <div className="mb-8">
               <div className="w-40 h-40 bg-white rounded-full mx-auto flex items-center justify-center shadow-2xl">
-                <span className="text-6xl">🗣️</span>
+              
+              <span className="inline-flex items-center justify-center">
+                    <img
+                      src="/favicon.png"
+                      alt="Civic Voice Icon"
+                      className="w-28 h-28 object-contain"
+                    />
+                  </span>
+
+
               </div>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
