@@ -176,7 +176,13 @@ const Home = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex justify-center mb-8">
             <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-2xl">
-              <span className="text-6xl">🗣️</span>
+            <span className="inline-flex items-center justify-center">
+                    <img
+                      src="/favicon.png"
+                      alt="Civic Voice Icon"
+                      className="w-24 h-22 object-contain"
+                    />
+                  </span>
             </div>
           </div>
           
