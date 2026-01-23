@@ -15,6 +15,7 @@ const Moments = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [heroSlide, setHeroSlide] = useState(0);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 24,
@@ -29,6 +30,30 @@ const Moments = () => {
     { id: 'speeches', label: 'Speeches & Forums', emoji: '🎤' },
     { id: 'meetings', label: 'County Meetings', emoji: '💼' }
   ];
+
+  // Auto-advance hero carousel
+  useEffect(() => {
+    const heroImages = getHeroImages();
+    if (heroImages.length > 0) {
+      const interval = setInterval(() => {
+        setHeroSlide((prev) => (prev + 1) % heroImages.length);
+      }, 5000); // Change slide every 5 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [moments]);
+
+  // Get featured or recent images for hero carousel
+  const getHeroImages = () => {
+    if (moments.length === 0) return [];
+    
+    // Get featured moments first, then fill with recent ones
+    const featured = moments.filter(m => m.featured).slice(0, 5);
+    const needed = 5 - featured.length;
+    const recent = moments.filter(m => !m.featured).slice(0, needed);
+    
+    return [...featured, ...recent].slice(0, 5);
+  };
 
   // Get media URLs from moment (handles both single and multiple)
   const getMediaUrls = (moment) => {
@@ -122,7 +147,6 @@ const Moments = () => {
   // Increment view count when viewing a moment
   const handleViewMoment = async (moment) => {
     try {
-      // Increment view on backend
       const response = await fetch(`${API_BASE}/api/gallery/${moment._id}`, {
         method: 'GET'
       });
@@ -130,7 +154,6 @@ const Moments = () => {
       if (response.ok) {
         const data = await response.json();
         
-        // Update local state with the response from backend
         setMoments(prevMoments => 
           prevMoments.map(m => 
             m._id === moment._id 
@@ -140,17 +163,16 @@ const Moments = () => {
         );
 
         setSelectedImage(data.data);
-        setCurrentSlide(0); // Reset carousel to first slide
+        setCurrentSlide(0);
       }
     } catch (err) {
       console.error('Error tracking view:', err);
-      // Still show the modal even if view tracking fails
       setSelectedImage(moment);
       setCurrentSlide(0);
     }
   };
 
-  // Handle like - FIXED VERSION
+  // Handle like
   const handleLike = async (momentId, e) => {
     if (e) {
       e.preventDefault();
@@ -158,24 +180,17 @@ const Moments = () => {
     }
 
     try {
-      console.log('Liking moment:', momentId);
-      
       const response = await fetch(`${API_BASE}/api/gallery/${momentId}/like`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
         }
       });
-
-      console.log('Like response status:', response.status);
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Like response data:', data);
-        
         const newLikes = data.data.likes;
         
-        // Update moments list
         setMoments(prevMoments =>
           prevMoments.map(m =>
             m._id === momentId
@@ -184,7 +199,6 @@ const Moments = () => {
           )
         );
 
-        // Update filtered moments
         setFilteredMoments(prevMoments =>
           prevMoments.map(m =>
             m._id === momentId
@@ -193,13 +207,9 @@ const Moments = () => {
           )
         );
 
-        // Update selected image if it's currently open
         if (selectedImage && selectedImage._id === momentId) {
           setSelectedImage(prev => ({ ...prev, likes: newLikes }));
         }
-      } else {
-        const errorText = await response.text();
-        console.error('Like failed:', errorText);
       }
     } catch (err) {
       console.error('Error liking moment:', err);
@@ -210,7 +220,6 @@ const Moments = () => {
     fetchMoments(selectedCategory, pagination.page, searchTerm);
   }, [selectedCategory, pagination.page]);
 
-  // Handle search with debounce
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchTerm !== undefined) {
@@ -247,7 +256,6 @@ const Moments = () => {
     }
   };
 
-  // Carousel navigation
   const nextSlide = () => {
     const mediaUrls = getMediaUrls(selectedImage);
     setCurrentSlide((prev) => (prev + 1) % mediaUrls.length);
@@ -258,40 +266,101 @@ const Moments = () => {
     setCurrentSlide((prev) => (prev - 1 + mediaUrls.length) % mediaUrls.length);
   };
 
+  const heroImages = getHeroImages();
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-600 to-red-600 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">Coverage Gallery</h1>
-          <p className="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto">
-            Documenting governance, community events, and civic engagement across Machakos County
-          </p>
-          {categoryCounts && (
-            <div className="mt-8 flex justify-center space-x-8">
-              <div className="text-center">
-                <div className="text-3xl font-bold">{categoryCounts.all || 0}</div>
-                <div className="text-sm opacity-80">Total Coverage</div>
+      {/* Hero Section with Background Carousel */}
+      <section className="relative h-[600px] overflow-hidden">
+        {/* Background Carousel */}
+        <div className="absolute inset-0">
+          {heroImages.length > 0 ? (
+            <>
+              {heroImages.map((moment, index) => {
+                const mediaUrls = getMediaUrls(moment);
+                const firstMedia = mediaUrls[0];
+                
+                return (
+                  <div
+                    key={moment._id}
+                    className={`absolute inset-0 transition-opacity duration-1000 ${
+                      index === heroSlide ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  >
+                    {firstMedia && firstMedia.resourceType !== 'video' ? (
+                      <img
+                        src={firstMedia.url}
+                        alt={moment.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-green-600 to-red-600" />
+                    )}
+                    {/* Dark overlay */}
+                    <div className="absolute inset-0 bg-black bg-opacity-60" />
+                  </div>
+                );
+              })}
+              
+              {/* Carousel Navigation Dots */}
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                {heroImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setHeroSlide(index)}
+                    className={`w-3 h-3 rounded-full transition-all ${
+                      index === heroSlide 
+                        ? 'bg-white w-8' 
+                        : 'bg-white bg-opacity-50 hover:bg-opacity-75'
+                    }`}
+                  />
+                ))}
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold">
-                  {moments.reduce((sum, m) => sum + (m.views || 0), 0)}
-                </div>
-                <div className="text-sm opacity-80">Total Views</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold">
-                  {moments.reduce((sum, m) => sum + (m.likes || 0), 0)}
-                </div>
-                <div className="text-sm opacity-80">Community Engagement</div>
-              </div>
-            </div>
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-green-600 to-red-600" />
           )}
         </div>
+
+        {/* Hero Content */}
+        <div className="relative z-10 h-full flex items-center justify-center">
+          <div className="max-w-7xl mx-auto px-4 text-center text-white">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-in">
+              Coverage Gallery
+            </h1>
+            <p className="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto mb-8">
+              Documenting governance, community events, and civic engagement across Machakos County
+            </p>
+            
+            {categoryCounts && (
+              <div className="mt-8 flex flex-wrap justify-center gap-6 md:gap-12">
+                <div className="text-center backdrop-blur-sm bg-white bg-opacity-10 px-6 py-4 rounded-lg">
+                  <div className="text-4xl font-bold">{categoryCounts.all || 0}</div>
+                  <div className="text-sm opacity-90 mt-1">Total Coverage</div>
+                </div>
+                <div className="text-center backdrop-blur-sm bg-white bg-opacity-10 px-6 py-4 rounded-lg">
+                  <div className="text-4xl font-bold">
+                    {moments.reduce((sum, m) => sum + (m.views || 0), 0).toLocaleString()}
+                  </div>
+                  <div className="text-sm opacity-90 mt-1">Total Views</div>
+                </div>
+                <div className="text-center backdrop-blur-sm bg-white bg-opacity-10 px-6 py-4 rounded-lg">
+                  <div className="text-4xl font-bold">
+                    {moments.reduce((sum, m) => sum + (m.likes || 0), 0).toLocaleString()}
+                  </div>
+                  <div className="text-sm opacity-90 mt-1">Engagements</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Gradient fade at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-50 to-transparent z-10" />
       </section>
 
       {/* Search and Filter Section */}
-      <section className="py-8 bg-white shadow-sm sticky top-0 z-10">
+      <section className="py-8 bg-white shadow-sm sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4">
           {/* Search Bar */}
           <div className="mb-4">
@@ -390,7 +459,6 @@ const Moments = () => {
                       }`}
                       onClick={() => handleViewMoment(moment)}
                     >
-                      {/* Image */}
                       <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative overflow-hidden">
                         {firstMedia ? (
                           firstMedia.resourceType === 'video' ? (
@@ -410,14 +478,12 @@ const Moments = () => {
                           <div className="text-6xl">{moment.image || '📸'}</div>
                         )}
                         
-                        {/* Multiple images indicator */}
                         {mediaUrls.length > 1 && (
                           <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded-full text-xs font-semibold">
                             📷 {mediaUrls.length}
                           </div>
                         )}
                         
-                        {/* View and Like counters overlay */}
                         <div className="absolute bottom-2 right-2 flex gap-2">
                           <span className="bg-black bg-opacity-70 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
                             <Eye size={12} /> {moment.views || 0}
@@ -428,7 +494,6 @@ const Moments = () => {
                         </div>
                       </div>
 
-                      {/* Content */}
                       <div className="p-6">
                         <div className="flex items-center justify-between mb-3">
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(moment.category)}`}>
@@ -468,7 +533,6 @@ const Moments = () => {
                 })}
               </div>
 
-              {/* Load More Button */}
               {pagination.page < pagination.pages && (
                 <div className="text-center mt-12">
                   <button
@@ -490,7 +554,6 @@ const Moments = () => {
         <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="relative">
-              {/* Carousel */}
               <div className="relative h-96 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                 {(() => {
                   const mediaUrls = getMediaUrls(selectedImage);
@@ -516,7 +579,6 @@ const Moments = () => {
                   );
                 })()}
 
-                {/* Carousel Navigation */}
                 {getMediaUrls(selectedImage).length > 1 && (
                   <>
                     <button
@@ -532,7 +594,6 @@ const Moments = () => {
                       <ChevronRight size={24} />
                     </button>
                     
-                    {/* Slide Indicators */}
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
                       {getMediaUrls(selectedImage).map((_, index) => (
                         <button
@@ -547,7 +608,6 @@ const Moments = () => {
                       ))}
                     </div>
                     
-                    {/* Counter */}
                     <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm font-semibold">
                       {currentSlide + 1} / {getMediaUrls(selectedImage).length}
                     </div>
@@ -555,7 +615,6 @@ const Moments = () => {
                 )}
               </div>
 
-              {/* Close Button */}
               <button
                 onClick={() => setSelectedImage(null)}
                 className="absolute top-4 right-4 bg-black bg-opacity-50 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-opacity-75 transition-colors z-10"
@@ -614,7 +673,6 @@ const Moments = () => {
                     <Share2 size={18} /> Share Coverage
                   </button>
 
-                  {/* Share Menu Dropdown */}
                   {showShareMenu && (
                     <>
                       <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-xl border border-gray-200 p-2 z-20">
@@ -660,7 +718,6 @@ const Moments = () => {
                         </button>
                       </div>
                       
-                      {/* Backdrop to close menu */}
                       <div
                         className="fixed inset-0 z-10"
                         onClick={() => setShowShareMenu(false)}
