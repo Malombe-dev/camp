@@ -1,28 +1,50 @@
 // client/src/components/cards/MomentCard.jsx
 import { useState } from 'react';
-import { Heart, Share2, MapPin, Calendar, Users, Play } from 'lucide-react';
+import { Heart, Share2, MapPin, Calendar, Users, Play, Link2, Check } from 'lucide-react';
+import { Facebook, Twitter, Instagram } from 'lucide-react';
 
 const MomentCard = ({ moment }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likes, setLikes] = useState(moment.likes || 0);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
     setLikes(prev => isLiked ? prev - 1 : prev + 1);
   };
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: moment.title,
-          text: moment.description,
-          url: window.location.href
-        });
-      } catch (err) {
-        console.log('Error sharing:', err);
-      }
+  const momentUrl = `${window.location.origin}/moments/${moment.id || moment._id}`;
+  
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(momentUrl);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch (err) {
+      console.log('Error copying link:', err);
     }
+  };
+
+  const handleShareFacebook = () => {
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(momentUrl)}`;
+    window.open(url, '_blank', 'width=600,height=400');
+  };
+
+  const handleShareTwitter = () => {
+    const text = `${moment.title} - ${moment.description}`;
+    const url = `https://twitter.com/intent/tweet?url=${encodeURIComponent(momentUrl)}&text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank', 'width=600,height=400');
+  };
+
+  const handleShareInstagram = () => {
+    // Instagram doesn't support direct web sharing, so we'll copy the link
+    handleCopyLink();
+    alert('Link copied! Open Instagram and paste it in your post or story.');
+  };
+
+  const handleShare = () => {
+    setShowShareMenu(!showShareMenu);
   };
 
   const formatDate = (date) => {
@@ -112,13 +134,61 @@ const MomentCard = ({ moment }) => {
             <span>{likes}</span>
           </button>
 
-          <button
-            onClick={handleShare}
-            className="flex items-center space-x-1 text-sm text-gray-500 hover:text-blue-500 transition-colors"
-          >
-            <Share2 className="h-4 w-4" />
-            <span>Share</span>
-          </button>
+          <div className="relative">
+            <button
+              onClick={handleShare}
+              className="flex items-center space-x-1 text-sm text-gray-500 hover:text-blue-500 transition-colors"
+            >
+              <Share2 className="h-4 w-4" />
+              <span>Share</span>
+            </button>
+
+            {/* Share Menu Dropdown */}
+            {showShareMenu && (
+              <div className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-xl border border-gray-200 p-2 z-10 min-w-[200px]">
+                <button
+                  onClick={handleCopyLink}
+                  className="w-full flex items-center space-x-2 px-3 py-2 hover:bg-gray-100 rounded text-sm text-gray-700 transition-colors"
+                >
+                  {linkCopied ? (
+                    <>
+                      <Check className="h-4 w-4 text-green-500" />
+                      <span className="text-green-500">Link copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Link2 className="h-4 w-4" />
+                      <span>Copy link</span>
+                    </>
+                  )}
+                </button>
+                
+                <button
+                  onClick={handleShareFacebook}
+                  className="w-full flex items-center space-x-2 px-3 py-2 hover:bg-gray-100 rounded text-sm text-gray-700 transition-colors"
+                >
+                  <Facebook className="h-4 w-4 text-blue-600" />
+                  <span>Share on Facebook</span>
+                </button>
+                
+                <button
+                  onClick={handleShareTwitter}
+                  className="w-full flex items-center space-x-2 px-3 py-2 hover:bg-gray-100 rounded text-sm text-gray-700 transition-colors"
+                >
+                  <Twitter className="h-4 w-4 text-sky-500" />
+                  <span>Share on X (Twitter)</span>
+                </button>
+                
+                <button
+                  onClick={handleShareInstagram}
+                  className="w-full flex items-center space-x-2 px-3 py-2 hover:bg-gray-100 rounded text-sm text-gray-700 transition-colors"
+                >
+                  <Instagram className="h-4 w-4 text-pink-600" />
+                  <span>Share on Instagram</span>
+                </button>
+              </div>
+            )}
+          </div>
 
           {moment.tags && moment.tags.length > 0 && (
             <div className="flex items-center space-x-1">
@@ -137,6 +207,14 @@ const MomentCard = ({ moment }) => {
           )}
         </div>
       </div>
+
+      {/* Click outside to close share menu */}
+      {showShareMenu && (
+        <div
+          className="fixed inset-0 z-0"
+          onClick={() => setShowShareMenu(false)}
+        />
+      )}
     </div>
   );
 };

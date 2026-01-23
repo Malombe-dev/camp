@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Heart, Calendar, MapPin, Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Eye, Heart, Calendar, MapPin, Search, X, ChevronLeft, ChevronRight, Link2, Check, Facebook, Twitter, Instagram, Share2 } from 'lucide-react';
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://server-mern-zc6l.onrender.com';
 
@@ -13,6 +13,8 @@ const Moments = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 24,
@@ -36,6 +38,45 @@ const Moments = () => {
       return [moment.mediaUrl];
     }
     return [];
+  };
+
+  // Generate shareable URL for moment
+  const getMomentUrl = (moment) => {
+    return `${window.location.origin}/moments/${moment._id}`;
+  };
+
+  // Handle copy link
+  const handleCopyLink = async (moment) => {
+    try {
+      const url = getMomentUrl(moment);
+      await navigator.clipboard.writeText(url);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch (err) {
+      console.log('Error copying link:', err);
+    }
+  };
+
+  // Handle social media sharing
+  const handleShareFacebook = (moment) => {
+    const url = getMomentUrl(moment);
+    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    window.open(shareUrl, '_blank', 'width=600,height=400');
+    setShowShareMenu(false);
+  };
+
+  const handleShareTwitter = (moment) => {
+    const url = getMomentUrl(moment);
+    const text = `${moment.title} - ${moment.description}`;
+    const shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+    window.open(shareUrl, '_blank', 'width=600,height=400');
+    setShowShareMenu(false);
+  };
+
+  const handleShareInstagram = (moment) => {
+    handleCopyLink(moment);
+    alert('Link copied! Open Instagram and paste it in your post or story.');
+    setShowShareMenu(false);
   };
 
   // Fetch gallery items
@@ -564,9 +605,69 @@ const Moments = () => {
                 >
                   <Heart size={18} /> Engage ({selectedImage.likes || 0})
                 </button>
-                <button className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors">
-                  Share Coverage
-                </button>
+                
+                <div className="flex-1 relative">
+                  <button 
+                    onClick={() => setShowShareMenu(!showShareMenu)}
+                    className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Share2 size={18} /> Share Coverage
+                  </button>
+
+                  {/* Share Menu Dropdown */}
+                  {showShareMenu && (
+                    <>
+                      <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-xl border border-gray-200 p-2 z-20">
+                        <button
+                          onClick={() => handleCopyLink(selectedImage)}
+                          className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-100 rounded text-sm text-gray-700 transition-colors"
+                        >
+                          {linkCopied ? (
+                            <>
+                              <Check className="h-5 w-5 text-green-500" />
+                              <span className="text-green-500 font-medium">Link copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Link2 className="h-5 w-5" />
+                              <span>Copy link</span>
+                            </>
+                          )}
+                        </button>
+                        
+                        <button
+                          onClick={() => handleShareFacebook(selectedImage)}
+                          className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-100 rounded text-sm text-gray-700 transition-colors"
+                        >
+                          <Facebook className="h-5 w-5 text-blue-600" />
+                          <span>Share on Facebook</span>
+                        </button>
+                        
+                        <button
+                          onClick={() => handleShareTwitter(selectedImage)}
+                          className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-100 rounded text-sm text-gray-700 transition-colors"
+                        >
+                          <Twitter className="h-5 w-5 text-sky-500" />
+                          <span>Share on X (Twitter)</span>
+                        </button>
+                        
+                        <button
+                          onClick={() => handleShareInstagram(selectedImage)}
+                          className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-100 rounded text-sm text-gray-700 transition-colors"
+                        >
+                          <Instagram className="h-5 w-5 text-pink-600" />
+                          <span>Share on Instagram</span>
+                        </button>
+                      </div>
+                      
+                      {/* Backdrop to close menu */}
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={() => setShowShareMenu(false)}
+                      />
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>

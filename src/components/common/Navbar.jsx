@@ -28,7 +28,7 @@ const Navbar = () => {
     { id: "/", label: "Home", icon: "🏠" },
     { id: "/about", label: "About", icon: "ℹ️" },
     { id: "/press", label: "News", icon: "📰" },
-    { id: "/moments", label: "Gallery", icon: "📸" },
+    { id: "/moments", label: "Memories", icon: "📸" },
     { id: "/contact", label: "Contact", icon: "📞" },
     { id: "/pressadmin", label: "Admin", icon: "⚙️", guard: true },
   ];

@@ -16,6 +16,7 @@ import AdminNotFound from './admin/components/AdminNotFound';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfUse from './pages/TermsOfUse';
 import EditorialPolicy from './pages/EditorialPolicy';
+import MomentDetail from './pages/MomentDetail';
 
 // Admin Components
 import PressAdmin from './admin/components/PressAdmin';
@@ -94,6 +95,7 @@ function App() {
       <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
       <Route path="/terms" element={<PublicLayout><TermsOfUse /></PublicLayout>} />
       <Route path="/editorial-policy" element={<PublicLayout><EditorialPolicy /></PublicLayout>} />
+      <Route path="/moments/:id" element={<PublicLayout><MomentDetail /></PublicLayout>} />
 
       {/* 404 - Catch ALL other undefined routes */}
       <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
